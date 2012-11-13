@@ -16,6 +16,19 @@ JVM性能优化， Part 1 —— JVM简介
 >在我职业生涯的早期，垃圾回收的问题曾经很难解决。垃圾回收问题和JVM的跨平台问题我更加为JVM和中间件的相关技术而着迷。我对JVM的热情源于十年前在[JRockit][1]团队工作的经历，当时要编码实现一种新的、能够自动学习、自动调优的垃圾回收算法（参见"相关资源"）。从那个项目开始，我踏上了JVM技术之旅，期间在BEA System公司工作的很多年，与Intel公司和Sun公司有过合作关系，在Oracle收购BEA公司和Sun公司之后为Oracle工作了一年。另外，我的硕士论文深入分析了JRockit的试验性特性，为[Deterministic Garbage Collection算法][2]打下了基础。当我加入Azul公司的团队后，我的工作陷入僵局，负责管理维护[Zing JVM][3]的垃圾回收算法（My work came full circle when I joined the team at Azul Systems and got to manage Zing JVM with its unique approach to garbage collection.）。现在我的工作有了一点小变化，负责日程安排与资源管理，关注分布式的可伸缩数据处理框架，目前在Cloudera公司工作，负责开源项目[Hadoop][4]的开发。
 
 
+*相关资源
+
+* "To Collect or Not To Collect." (Eva Andreasson, Frank Hoffmann, Olof Lindholm; JVM-02: Proceedings of the Java Virtual Machine Research and Technology Symposium, 2002): Presents the authors' research into an adaptive decision process that determines which garbage collector technique should be invoked and how it should be applied.
+* "Reinforcement Learning for a dynamic JVM" (Eva Andreasson, KTH Royal Institute of Technology, 2002): Master thesis report on how to use reinforcement learning to better optimize the decision of when to start concurrent garbage collection for a dynamic workload.
+* "Deterministic Garbage Collection: Unleash the Power of Java with Oracle JRockit Real Time" (An Oracle White Paper, August 2008): Learn more about the Deterministic Garbage Collection algorithm in JRockit Real Time.
+Why is Java faster when using a JIT vs. compiling to machine code? (Stackoverflow, December 2009): A thread discussion for learning more about Just-in-Time compiler technology.
+* Zing: A fully Java compliant highly scalable software platform that includes an application-aware resource controller and zero overhead, always-on production visibility and diagnostic tools. Zing incorporates industry-leading, proven technology to allow TBs memory heap sizes per instance with sustained throughput under dynamic load and extreme memory allocation rates common for Java applications.
+* "G1: Java's Garbage First Garbage Collector" (Eric Bruno, Dr. Dobb's, August 2009): A good overview of GC and introduction to the G1 garbage collector.
+* Oracle JRockit: The Definitive Guide (Marcus Hirt, Marcus Lagergren; Packt Publishing, 2010): A complete guide to the JRockit JVM.
+
+
+
+
 [1]: http://www.infoworld.com/d/developer-world/oracle-moving-merge-jrockit-hotspot-jvms-448  "JRockit" 
 [2]: http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html#resources  "Deterministic Garbage Collection算法"  
 [3]: http://www.infoworld.com/d/developer-world/azul-systems-searches-managed-runtime-breakthroughs-228 "Zing JVM"  
