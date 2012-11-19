@@ -130,7 +130,7 @@ I've also briefly discussed memory allocation and garbage collection, and how bo
 
 Eva Andreasson has been involved with Java virtual machine technologies, SOA, cloud computing, and other enterprise middleware solutions for 10 years. She joined the startup Appeal Virtual Solutions (later acquired by BEA Systems) in 2001 as a developer of the JRockit JVM. Eva has been awarded two patents for garbage collection heuristics and algorithms. She also pioneered Deterministic Garbage Collection which later became productized through JRockit Real Time. Eva has worked closely with Sun and Intel on technical partnerships, as well as various integration projects of JRockit Product Group, WebLogic, and Coherence (post Oracle acquisition in 2008). In 2009 Eva joined [Azul Systems][15] as product manager for the new Zing Java Platform. Recently she switched gears and joined the team at [Cloudera][16] as senior product manager for Cloudera's Hadoop distribution, where she is engaged in the exciting future and innovation path of highly scalable, distributed data processing frameworks.
 
-Read more about Core Java in JavaWorld's Core Java section.
+[Read more about Core Java][17] in JavaWorld's Core Java section.
 
 
 #相关资源
@@ -162,3 +162,4 @@ Read more about Core Java in JavaWorld's Core Java section.
 [14]: http://java.sun.com/docs/books/performance/1st_edition/html/JPAppGC.fm.html  "weak reference"
 [15]: http://www.azulsystems.com/  "Azul Systems"
 [16]: http://www.cloudera.com/company/  "Cloudera"
+[17]: http://www.javaworld.com/channel_content/jw-core-index.html  "Read more about Core Java"
