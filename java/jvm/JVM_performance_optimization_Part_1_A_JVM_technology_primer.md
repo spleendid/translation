@@ -30,6 +30,91 @@ Machine-optimized code might deliver better performance, but it comes at the cos
 * Portability -- no need to rewrite a Java application for every new platform
 
 
+#From Java code to bytecode
+
+As a Java programmer, you are probably familiar with coding, compiling, and executing Java applications. For the sake of example, let's assume that you have a program, MyApp.java and you want to run it. To execute this program you need to first compile it with javac, the JDK's built-in static Java language-to-bytecode compiler. Based on the Java code, javac generates the corresponding executable bytecode and saves it into a same-named class file: MyApp.class. After compiling the Java code into bytecode, you are ready to run your application by launching the executable class file with the java command from your command-line or startup script, with or without startup options. The class is loaded into the runtime (meaning the running Java virtual machine) and your program starts executing.
+
+That's what happens on the surface of an everyday application execution scenario, but now let's explore what really happens when you call that java command. What is this thing called a Java virtual machine? Most developers have interacted with a JVM through the continuous process of tuning -- aka selecting and value-assigning startup options to make your Java program run faster, while deftly avoiding the infamous JVM "out of memory" error. But have you ever wondered why we need a JVM to run Java applications in the first place?
+
+
+#What is a Java virtual machine?
+
+Simply speaking, a JVM is the software module that executes Java application bytecode and translates the bytecode into hardware- and operating system-specific instructions. By doing so, the JVM enables Java programs to be executed in different environments from where they were first written, without requiring any changes to the original application code. Java's portability is key to its popularity as an enterprise application language: developers don't have to rewrite application code for every platform because the JVM handles the translation and platform-optimization.
+
+
+>A JVM basically is a virtual execution environment acting as a machine for bytecode instructions, while assigning execution tasks and performing memory operations through interaction with underlying layers.
+
+A JVM also takes care of dynamic resource management for running Java applications. This means it handles allocating and de-allocating memory, maintaining a consistent thread model on each platform, and organizing the executable instructions in a way that is suited for the CPU architecture where the application is executed. The JVM frees the programmer from keeping track of references between objects and knowing how long they should be kept in the system. It also frees us from having to decide exactly when to issue explicit instructions to free up memory -- an acknowledged pain point of non-dynamic programming languages like C.
+
+
+You could think about the JVM as a specialized operating system for Java; its job is to manage the runtime environment for Java applications. A JVM basically is a virtual execution environment acting as a machine for bytecode instructions, while assigning execution tasks and performing memory operations through interaction with underlying layers.
+
+
+#JVM components overview
+
+There's a lot more to write about JVM internals and performance optimization. As foundation for upcoming articles in this series, I'll conclude with an overview of JVM components. This brief tour will be especially helpful for developers new to the JVM, and should prime your appetite for more in-depth discussions later in the series.
+
+##From one language to another -- about Java compilers
+
+A `compiler` takes one language as an input and produces an executable language as an output. A Java compiler has two main tasks:
+
+1. Enable the Java language to be more portable, not tied into any specific platform when first written
+2. Ensure that the outcome is efficient execution code for the intended target execution platform
+
+
+Compilers are either static or dynamic. An example of a static compiler is javac. It takes Java code as input and translates it into bytecode -- a language that is executable by the Java virtual machine. *Static compilers* interpret the input code once and the output executable is in the form that will be used when the program executes. Because the input is static you will always see the same outcome. Only when you make changes to your original source and recompile will you see a different result.
+
+
+*Dynamic compilers*, such as [Just-In-Time (JIT)][5] compilers, perform the translation from one language to another dynamically, meaning they do it as the code is executed. A JIT compiler lets you collect or create runtime profiling data (by the means of inserting performance counters) and make compiler decisions on the fly, using the environment data at hand. Dynamic compilation makes it possible to better sequence instructions in the compiled-to language, replace a set of instructions with more efficient sets, or even eliminate redundant operations. Over time you can collect more code-profiling data and make additional and better compilation decisions; altogether this is usually referred to as code optimization and recompilation.
+
+
+Dynamic compilation gives you the advantage of being able to adapt to dynamic changes in behavior or application load over time that drive the need for new optimizations. This is why dynamic compilers are very well suited to Java runtimes. The catch is that dynamic compilers can require extra data structures, thread resources, and CPU cycles for profiling and optimization. For more advanced optimizations you'll need even more resources. In most environments, however, the overhead is very small for the execution performance improvement gained -- five or 10 times better performance than what you would get from pure interpretation (meaning, executing the bytecode as-is, without modification).
+
+
+#Allocation leads to garbage collection#
+
+`Allocation` is done on a per-thread basis in each "Java process dedicated memory address space," also known as the Java heap, or heap for short. Single-threaded allocation is common in the client-side application world of Java. Single-threaded allocation quickly becomes non-optimal in the enterprise application and workload-serving side, however, because it doesn't take advantage of the parallelism in modern multicore environments.
+
+
+Parallell application design also forces the JVM to ensure that multiple threads do not allocate the same address space at the same time. You could control this by putting a lock on the entire allocation space. But this technique (a so-called heap lock) comes at a cost, as holding or queuing threads can cause a performance hit to resource utilization and application performance. A plus side of multicore systems is that they've created a demand for various new approaches to resource allocation in order to prevent the bottlenecking of single-thread, serialized allocation.
+
+A common approach is to divide the heap into several partitions, where each partition is of a "decent size" for the application -- obviously something that would need tuning, as allocation rate and object sizes vary significantly for different applications, as well as by number of threads. A Thread Local Allocation Buffer (TLAB), or sometimes Thread Local Area (TLA), is a dedicated partition that a thread allocates freely within, without having to claim a full heap lock. Once the area is full, the thread is assigned a new area until the heap runs out of areas to dedicate. When there's not enough space left to allocate the heap is "full," meaning the empty space on the heap is not large enough for the object that needs to be allocated. When the heap is full, garbage collection kicks in.
+
+
+#Fragmentation#
+
+A catch with the use of TLABs is the risk of inducing memory inefficiency by fragmenting the heap. If an application happens to allocate object sizes that do not add up to or fully allocate a TLAB size, there is a risk that a tiny empty space too small to host a new object will be left. This leftover space is referred to as a "fragment." If the application also happens to keep references to objects that are allocated next to these leftover spaces then the space could remain un-used for a long time.
+
+Fragmentation is what happens when fragments are scattered over the heap -- wasting heap space with tiny pieces of un-used memory. Configuring the "wrong" TLAB size for your application allocation behavior (with regard to object sizes and mix of object sizes and reference holding rate) is one path to an increasingly fragmented heap. As the application continues to run, the number of wasted fragmented spaces will come to hold an increasing portion of the free memory on the heap. Fragmentation causes decreased performance as the system is unable to allocate enough space for new application threads and objects. The garbage collector subsequently works harder to prevent out-of-memory exceptions.
+
+TLAB waste can be worked around. One way to temporarily or completely avoid fragmentation is to tune TLAB size on a per-application basis. This approach typically requires re-tuning as soon as your application allocation behavior changes. It is also possible to use sophisticated JVM algorithms and other approaches to organize heap partitions for more efficient memory allocation. For instance, a JVM could implement free-lists, which are linked lists of free memory chunks of specific sizes. A consecutive free chunk of memory is linked to a linked list of other chunks of a similar size, thus creating a handful of lists, each with its own size range. In some case using free-lists leads to a better fitted-memory allocation approach. Threads allocating a certain-sized object are enabled to allocate it in chunks close to the object's size, generating potentially less fragmentation than if you just relied on fixed-sized TLABs.
+
+>#GC trivia#
+>
+>Some early garbage collectors had multiple old generations, but it emerged that more than two old generation spaces resulted in more overhead than value.
+
+Another way to optimize allocation versus fragmentation is to create a so-called young generation, which is a dedicated heap area (e.g., address space) where you will allocate all new objects. The rest of the heap becomes the so-called old generation. The old generation is left for the allocation of longer lived objects, meaning objects that have survived garbage collection or large objects that are assumed to live for a very long time. In order to better understand this approach to allocation we need to talk a bit about garbage collection.
+
+#Garbage collection and application performance
+
+Garbage collection is the operation performed by the JVM's garbage collector to free up occupied heap memory that is no longer referenced. When a garbage collection is first triggered, all objects that are still referenced are kept, and the space occupied by previously referenced objects is freed or reclaimed. When all reclaimable memory has been collected, the space is up for grabs and ready to be allocated again by new objects.
+
+
+A garbage collector should never reclaim a referenced object; doing so would break the JVM standard specification. An exception to this rule is a soft or [weak reference][14] (if defined as such) that could be collected if the garbage collector were approaching a state of running out of memory. I strongly recommend that you try to avoid weak references as much as possible, however, because ambiguity in the Java specification has led to misinterpretation and error in their use. And besides, Java is designed for dynamic memory management, so you shouldn't have to think about where and when memory should be released.
+
+The challenge for a garbage collector is to reclaim memory without impacting running applications more than necessary. If you don't garbage-collect enough, your application will run out of memory; if you collect too frequently you'll lose throughput and response time, which will negatively impact running applications.
+
+#GC algorithms#
+
+There are many different garbage collection algorithms. Later in this series we will deep dive into a few. On the highest level, the main two approaches to garbage collection are reference counting and tracing collectors.
+
+* Reference counting collectors keep track of how many references an object has pointing to it. Once the count for an object becomes zero, the memory can immediately be reclaimed, which is one of the advantages of this approach. The difficulties with a reference-counting approach are circular structures and keeping all the reference counts up to date.
+* Tracing collectors mark each object that is still referenced, iteratively following and marking all objects referenced by already marked objects. Once all still referenced objects are marked "live," all non-marked space can be reclaimed. This approach handles circular structures, but in most cases the collector has to wait until marking is complete before it can reclaim the unreferenced memory.
+
+There are different ways to implement the above approaches. The more famous algorithms are marking or copying algorithms and parallel or concurrent algorithms. I'll talk about these in detail later in the series.
+
+Generational garbage collection means dedicating separate address spaces on the heap for new objects and older ones. By "older objects" I mean objects that have survived a number of garbage collections. Having a young generation for new allocations and an old generation for surviving objects reduces fragmentation by quickly reclaiming memory occupied by short-lived objects, and by moving long-living objects closer together as they are promoted to the old generation address space. All of this reduces the the risk of fragments between long-living objects and protects the heap from fragmentation. A positive side-effect of having a young generation is also that it delays the need for the more costly collection of the old generation, as you are constantly reusing the same space for short-lived objects. (Old-space collection is more costly because the long-lived objects that live there contain more references to be traversed.)
+
 
 #相关资源
 
@@ -57,3 +142,4 @@ Machine-optimized code might deliver better performance, but it comes at the cos
 [11]: http://www.azulsystems.com/products/zing/virtual-machine  "Zing"
 [12]: http://www.drdobbs.com/jvm/g1-javas-garbage-first-garbage-collector/219401061  "G1: Java's Garbage First Garbage Collector"
 [13]: http://www.packtpub.com/oracle-jrockit-definitive-guide/book?tag=  "Oracle JRockit: The Definitive Guide"
+[14]: http://java.sun.com/docs/books/performance/1st_edition/html/JPAppGC.fm.html  "weak reference"
