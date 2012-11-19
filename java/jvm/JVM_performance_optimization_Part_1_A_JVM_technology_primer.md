@@ -16,6 +16,21 @@ JVM性能优化， Part 1 —— JVM简介
 >在我职业生涯的早期，垃圾回收的问题曾经很难解决。垃圾回收问题和JVM的跨平台问题我更加为JVM和中间件的相关技术而着迷。我对JVM的热情源于十年前在[JRockit][1]团队工作的经历，当时要编码实现一种新的、能够自动学习、自动调优的垃圾回收算法（参见[相关资源][5]）。从那个项目开始，我踏上了JVM技术之旅，期间在BEA System公司工作的很多年，与Intel公司和Sun公司有过合作关系，在Oracle收购BEA公司和Sun公司之后为Oracle工作了一年。另外，我的硕士论文深入分析了JRockit的试验性特性，为[Deterministic Garbage Collection算法][2]打下了基础。当我加入Azul公司的团队后，我的工作陷入僵局，负责管理维护[Zing JVM][3]的垃圾回收算法（My work came full circle when I joined the team at Azul Systems and got to manage Zing JVM with its unique approach to garbage collection.）。现在我的工作有了一点小变化，负责日程安排与资源管理，关注分布式的可伸缩数据处理框架，目前在Cloudera公司工作，负责开源项目[Hadoop][4]的开发。
 
 
+#JVM performance and the 'one for all' challenge#
+
+I have news for people who are stuck with the idea that the Java platform is inherently slow. The belief that the JVM is to blame for poor Java performance is decades old -- it started when Java was first being used for enterprise applications, and it's outdated! It is true that if you compare the results of running simple static and deterministic tasks on different development platforms, you will most likely see better execution using machine-optimized code over using any virtualized environment, including a JVM. But Java performance has taken major leaps forward over the past 10 years. Market demand and growth in the Java industry have resulted in a handful of garbage-collection algorithms and new compilation innovations, and plenty of heuristics and optimizations have emerged as JVM technology has progressed. I'll introduce some of them later in this series.
+
+The beauty of JVM technology is also its biggest challenge: nothing can be assumed with a "write once, run anywhere" application. Rather than optimizing for one use case, one application, and one specific user load, the JVM constantly tracks what is going on in a Java application and dynamically optimizes accordingly. This dynamic runtime leads to a dynamic problem set. Developers working on the JVM can't rely on static compilation and predictable allocation rates when designing innovations, at least not if we want performance in production environments!
+
+Machine-optimized code might deliver better performance, but it comes at the cost of inflexibility, which is not a workable trade-off for enterprise applications with dynamic loads and rapid feature changes. Most enterprises are willing to sacrifice the narrowly perfect performance of machine-optimized code for the benefits of Java:
+
+* Ease of coding and feature development (meaning, faster time to market)
+* cess to knowledgeable programmers
+* Rapid development using Java APIs and standard libraries
+* Portability -- no need to rewrite a Java application for every new platform
+
+
+
 #相关资源
 
 * ["To Colelct or Not To Collect"][7] (Eva Andreasson, Frank Hoffmann, Olof Lindholm; JVM-02: Proceedings of the Java Virtual Machine Research and Technology Symposium, 2002): 文章介绍了作者对自适应决策过程的研究，改过程用于确定应该使用哪种垃圾回收器技术，以及如何应用该技术。
