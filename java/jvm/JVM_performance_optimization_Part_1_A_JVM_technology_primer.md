@@ -16,7 +16,7 @@ JVM性能优化， Part 1 —— JVM简介
 >在我职业生涯的早期，垃圾回收的问题曾经很难解决。垃圾回收问题和JVM的跨平台问题我更加为JVM和中间件的相关技术而着迷。我对JVM的热情源于十年前在[JRockit][1]团队工作的经历，当时要编码实现一种新的、能够自动学习、自动调优的垃圾回收算法（参见[相关资源][5]）。从那个项目开始，我踏上了JVM技术之旅，期间在BEA System公司工作的很多年，与Intel公司和Sun公司有过合作关系，在Oracle收购BEA公司和Sun公司之后为Oracle工作了一年。另外，我的硕士论文深入分析了JRockit的试验性特性，为[Deterministic Garbage Collection算法][2]打下了基础。当我加入Azul公司的团队后，我的工作陷入僵局，负责管理维护[Zing JVM][3]的垃圾回收算法（My work came full circle when I joined the team at Azul Systems and got to manage Zing JVM with its unique approach to garbage collection.）。现在我的工作有了一点小变化，负责日程安排与资源管理，关注分布式的可伸缩数据处理框架，目前在Cloudera公司工作，负责开源项目[Hadoop][4]的开发。
 
 
-#Java性能与“一次编写，到处运行”的挑战#
+#Java的性能与“一次编写，到处运行”的挑战#
 
 有不少人认为，Java平台本身就挺慢。其主要观点简单来说就是，Java性能低已经有些年头了 —— 最早可以追溯到Java第一次用于企业级应用程序开发的时候。但这早就是老黄历了。事实是，如果你对不同的开发平台上运行简单的、静态的、确定性任务的运行结果做比较，你就会发现使用经过机器级优化（machine-optimized）代码的平台比任何使用虚拟环境进行运算的都要强，JVM也不例外。但是，在过去的10年中，Java的性能有了大幅提升。市场上不断增长的需求催生了垃圾回收算法的出现和编译技术的革新，在不断探索与优化的过程中，JVM茁壮成长。在这个系列文章中，我将介绍其中的一些内容。
 
