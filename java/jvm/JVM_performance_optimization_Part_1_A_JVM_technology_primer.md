@@ -38,10 +38,11 @@ JVM技术中最迷人的地方也正是其最具挑战性的地方：“一次�
 
 #什么JVM
 
-Simply speaking, a JVM is the software module that executes Java application bytecode and translates the bytecode into hardware- and operating system-specific instructions. By doing so, the JVM enables Java programs to be executed in different environments from where they were first written, without requiring any changes to the original application code. Java's portability is key to its popularity as an enterprise application language: developers don't have to rewrite application code for every platform because the JVM handles the translation and platform-optimization.
+简单来说，JVM是用于执行Java应用程序和字节码的软件模块，并且可以将字节码转换为特定硬件和特定操作系统的本地代码。正因如此，JVM使Java程序做到了“一次编写，到处运行”。Java语言的可移植性是得到企业级应用程序开发者青睐的关键：开发者无需因平台不同而把程序重新编写一遍，因为有JVM负责处理字节码到本地代码的转换和平台相关优化的工作。
+
+>基本上讲，JVM是一个虚拟运行环境，对于字节码来说就像是一个机器一样，可以执行任务，并通过底层实现执行内存相关的操作。
 
 
->A JVM basically is a virtual execution environment acting as a machine for bytecode instructions, while assigning execution tasks and performing memory operations through interaction with underlying layers.
 
 A JVM also takes care of dynamic resource management for running Java applications. This means it handles allocating and de-allocating memory, maintaining a consistent thread model on each platform, and organizing the executable instructions in a way that is suited for the CPU architecture where the application is executed. The JVM frees the programmer from keeping track of references between objects and knowing how long they should be kept in the system. It also frees us from having to decide exactly when to issue explicit instructions to free up memory -- an acknowledged pain point of non-dynamic programming languages like C.
 
