@@ -30,15 +30,13 @@ JVM技术中最迷人的地方也正是其最具挑战性的地方：“一次�
 * 可移植性 —— 无需为每个平台都编写一套代码
 
 
+#从源代码到字节码#
 
-#From Java code to bytecode
+作为一名Java程序员，你可以已经对编码、编译和运行这一套流程比较熟悉了。假如说，现在你写了一个程序代码MyApp.java，准备编译运行。为了运行这个程序，首先，你需要使用JDK内建的Java语言编译器，javac，对这个文件进行编译，它可以将Java源代码编译为字节码。javac将根据Java程序的源代码生成对应的可执行字节码，并将其保存为同名类文件：MyApp.class。在经过编译阶段后，你就可以在命令行中使用java命令或其他启动脚本载入可执行的类文件来运行程序，并且可以为程序添加启动参数。之后，类会被载入到运行时（这里指的是正在运行的JVM），程序开始运行。
 
-As a Java programmer, you are probably familiar with coding, compiling, and executing Java applications. For the sake of example, let's assume that you have a program, MyApp.java and you want to run it. To execute this program you need to first compile it with javac, the JDK's built-in static Java language-to-bytecode compiler. Based on the Java code, javac generates the corresponding executable bytecode and saves it into a same-named class file: MyApp.class. After compiling the Java code into bytecode, you are ready to run your application by launching the executable class file with the java command from your command-line or startup script, with or without startup options. The class is loaded into the runtime (meaning the running Java virtual machine) and your program starts executing.
+上面所描述的就是在运行Java应用程序时的表面过程，但现在，我们要深入挖掘一下，在调用Java命令时，到底发生了什么？JVM到底是什么？大多数程序员是通过不断的调优，即使用相应的启动参数，与JVM进行交互，使Java程序运行的更快，同时避免程序出现“out of memory”错误。但你是否想过，为什么我们必须要通过JVM来运行Java应用程序呢？
 
-That's what happens on the surface of an everyday application execution scenario, but now let's explore what really happens when you call that java command. What is this thing called a Java virtual machine? Most developers have interacted with a JVM through the continuous process of tuning -- aka selecting and value-assigning startup options to make your Java program run faster, while deftly avoiding the infamous JVM "out of memory" error. But have you ever wondered why we need a JVM to run Java applications in the first place?
-
-
-#What is a Java virtual machine?
+#什么JVM
 
 Simply speaking, a JVM is the software module that executes Java application bytecode and translates the bytecode into hardware- and operating system-specific instructions. By doing so, the JVM enables Java programs to be executed in different environments from where they were first written, without requiring any changes to the original application code. Java's portability is key to its popularity as an enterprise application language: developers don't have to rewrite application code for every platform because the JVM handles the translation and platform-optimization.
 
