@@ -40,17 +40,15 @@ JVM技术中最迷人的地方也正是其最具挑战性的地方：“一次�
 
 简单来说，JVM是用于执行Java应用程序和字节码的软件模块，并且可以将字节码转换为特定硬件和特定操作系统的本地代码。正因如此，JVM使Java程序做到了“一次编写，到处运行”。Java语言的可移植性是得到企业级应用程序开发者青睐的关键：开发者无需因平台不同而把程序重新编写一遍，因为有JVM负责处理字节码到本地代码的转换和平台相关优化的工作。
 
->基本上讲，JVM是一个虚拟运行环境，对于字节码来说就像是一个机器一样，可以执行任务，并通过底层实现执行内存相关的操作。
+>基本上来说，JVM是一个虚拟运行环境，对于字节码来说就像是一个机器一样，可以执行任务，并通过底层实现执行内存相关的操作。
 
+JVM也可以在运行java应用程序时，很好的管理动态资源。这指的是他可以正确的分配、回收内存，在不同的上维护一个具有一致性的线程模型，并且可以为当前的CPU架构组织可执行指令。JVM解放了程序员，使程序员不必再关系对象的生命周期，使程序员不必再关心应该在何时释放内存。而这，正是使用着类似C语言的非动态语言的程序员心中永远的痛。
 
+你可以将JVM当做是一种专为Java而生的特殊的操作系统，它的工作是管理运行java应用程序的运行时环境。简单来说，JVM就是运行字节码指令的虚拟执行环境，并且可以分配执行任务，或通过底层实现对内存进行操作。
 
-A JVM also takes care of dynamic resource management for running Java applications. This means it handles allocating and de-allocating memory, maintaining a consistent thread model on each platform, and organizing the executable instructions in a way that is suited for the CPU architecture where the application is executed. The JVM frees the programmer from keeping track of references between objects and knowing how long they should be kept in the system. It also frees us from having to decide exactly when to issue explicit instructions to free up memory -- an acknowledged pain point of non-dynamic programming languages like C.
+#JVM组件简介
 
-
-You could think about the JVM as a specialized operating system for Java; its job is to manage the runtime environment for Java applications. A JVM basically is a virtual execution environment acting as a machine for bytecode instructions, while assigning execution tasks and performing memory operations through interaction with underlying layers.
-
-
-#JVM components overview
+关于JVM内部原理与性能优化有很多内容可写。作为这个系列的开篇文章，我将对JVM
 
 There's a lot more to write about JVM internals and performance optimization. As foundation for upcoming articles in this series, I'll conclude with an overview of JVM components. This brief tour will be especially helpful for developers new to the JVM, and should prime your appetite for more in-depth discussions later in the series.
 
