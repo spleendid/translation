@@ -44,27 +44,22 @@ JVM技术中最迷人的地方也正是其最具挑战性的地方：“一次�
 
 JVM也可以在运行java应用程序时，很好的管理动态资源。这指的是他可以正确的分配、回收内存，在不同的上维护一个具有一致性的线程模型，并且可以为当前的CPU架构组织可执行指令。JVM解放了程序员，使程序员不必再关系对象的生命周期，使程序员不必再关心应该在何时释放内存。而这，正是使用着类似C语言的非动态语言的程序员心中永远的痛。
 
-你可以将JVM当做是一种专为Java而生的特殊的操作系统，它的工作是管理运行java应用程序的运行时环境。简单来说，JVM就是运行字节码指令的虚拟执行环境，并且可以分配执行任务，或通过底层实现对内存进行操作。
+你可以将JVM当做是一种专为Java而生的特殊的操作系统，它的工作是管理运行Java应用程序的运行时环境。简单来说，JVM就是运行字节码指令的虚拟执行环境，并且可以分配执行任务，或通过底层实现对内存进行操作。
 
 #JVM组件简介
 
-关于JVM内部原理与性能优化有很多内容可写。作为这个系列的开篇文章，我将对JVM
+关于JVM内部原理与性能优化有很多内容可写。作为这个系列的开篇文章，我简单介绍JVM的内部组件。这个简要介绍对于那些JVM新手比较有帮助，也是为后面的深入讨论做个铺垫。
 
-There's a lot more to write about JVM internals and performance optimization. As foundation for upcoming articles in this series, I'll conclude with an overview of JVM components. This brief tour will be especially helpful for developers new to the JVM, and should prime your appetite for more in-depth discussions later in the series.
+##从一种语言到另一种 —— 关于Java编译器##
 
-##From one language to another -- about Java compilers
+`编译器`以一种语言为输入，生成另一种可执行语言作为输出。Java编译器主要完成2个任务：
 
-A `compiler` takes one language as an input and produces an executable language as an output. A Java compiler has two main tasks:
+1. 实现Java语言的可移植性，不必局限于某一特定平台；
+2. 确保输出代码可以在目标平台能够有效率的运行。
 
-1. Enable the Java language to be more portable, not tied into any specific platform when first written
-2. Ensure that the outcome is efficient execution code for the intended target execution platform
+编译器可以是静态的，也可以是动态的。静态编译器，如javac，它以Java源代码为输入，将其编译为字节码（一种可以运行JVM中的语言）。*静态编译器*解释输入的源代码，而生成可执行输出代码则会在程序真正运行时用到。因为输入是静态的，所有输出结果总是相同的。只有当你修改的源代码并重新编译时，才有可能看到不同的编译结果。
 
-
-Compilers are either static or dynamic. An example of a static compiler is javac. It takes Java code as input and translates it into bytecode -- a language that is executable by the Java virtual machine. *Static compilers* interpret the input code once and the output executable is in the form that will be used when the program executes. Because the input is static you will always see the same outcome. Only when you make changes to your original source and recompile will you see a different result.
-
-
-*Dynamic compilers*, such as [Just-In-Time (JIT)][5] compilers, perform the translation from one language to another dynamically, meaning they do it as the code is executed. A JIT compiler lets you collect or create runtime profiling data (by the means of inserting performance counters) and make compiler decisions on the fly, using the environment data at hand. Dynamic compilation makes it possible to better sequence instructions in the compiled-to language, replace a set of instructions with more efficient sets, or even eliminate redundant operations. Over time you can collect more code-profiling data and make additional and better compilation decisions; altogether this is usually referred to as code optimization and recompilation.
-
+*动态编译器*，如使用[Just-In-Time(JIT，即是编译)][5]技术的编译器，会动态的将一种编程语言编译为另一种语言，这个过程是在程序运行中同时进行的。JIT编译器会收集程序的运行时数据（在程序中插入性能计数器），再根据运行时数据和当前运行环境数据动态规划编译方案。动态编译可以生成更好的序列指令，使用更有效率的指令集合替换原指令集合，或剔除冗余操作。收集到的运行时数据的越多，动态编译的效果就越好；这通常称为代码优化或重编译。
 
 Dynamic compilation gives you the advantage of being able to adapt to dynamic changes in behavior or application load over time that drive the need for new optimizations. This is why dynamic compilers are very well suited to Java runtimes. The catch is that dynamic compilers can require extra data structures, thread resources, and CPU cycles for profiling and optimization. For more advanced optimizations you'll need even more resources. In most environments, however, the overhead is very small for the execution performance improvement gained -- five or 10 times better performance than what you would get from pure interpretation (meaning, executing the bytecode as-is, without modification).
 
