@@ -36,6 +36,7 @@ JVM技术中最迷人的地方也正是其最具挑战性的地方：“一次�
 
 上面所描述的就是在运行Java应用程序时的表面过程，但现在，我们要深入挖掘一下，在调用Java命令时，到底发生了什么？JVM到底是什么？大多数程序员是通过不断的调优，即使用相应的启动参数，与JVM进行交互，使Java程序运行的更快，同时避免程序出现“out of memory”错误。但你是否想过，为什么我们必须要通过JVM来运行Java应用程序呢？
 
+
 #什么JVM
 
 简单来说，JVM是用于执行Java应用程序和字节码的软件模块，并且可以将字节码转换为特定硬件和特定操作系统的本地代码。正因如此，JVM使Java程序做到了“一次编写，到处运行”。Java语言的可移植性是得到企业级应用程序开发者青睐的关键：开发者无需因平台不同而把程序重新编写一遍，因为有JVM负责处理字节码到本地代码的转换和平台相关优化的工作。
@@ -46,9 +47,11 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 
 你可以将JVM当做是一种专为Java而生的特殊的操作系统，它的工作是管理运行Java应用程序的运行时环境。简单来说，JVM就是运行字节码指令的虚拟执行环境，并且可以分配执行任务，或通过底层实现对内存进行操作。
 
+
 #JVM组件简介
 
 关于JVM内部原理与性能优化有很多内容可写。作为这个系列的开篇文章，我简单介绍JVM的内部组件。这个简要介绍对于那些JVM新手比较有帮助，也是为后面的深入讨论做个铺垫。
+
 
 ##从一种语言到另一种 —— 关于Java编译器##
 
@@ -61,7 +64,7 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 
 *动态编译器*，如使用[Just-In-Time(JIT，即是编译)][5]技术的编译器，会动态的将一种编程语言编译为另一种语言，这个过程是在程序运行中同时进行的。JIT编译器会收集程序的运行时数据（在程序中插入性能计数器），再根据运行时数据和当前运行环境数据动态规划编译方案。动态编译可以生成更好的序列指令，使用更有效率的指令集合替换原指令集合，或剔除冗余操作。收集到的运行时数据的越多，动态编译的效果就越好；这通常称为代码优化或重编译。
 
-Dynamic compilation gives you the advantage of being able to adapt to dynamic changes in behavior or application load over time that drive the need for new optimizations. This is why dynamic compilers are very well suited to Java runtimes. The catch is that dynamic compilers can require extra data structures, thread resources, and CPU cycles for profiling and optimization. For more advanced optimizations you'll need even more resources. In most environments, however, the overhead is very small for the execution performance improvement gained -- five or 10 times better performance than what you would get from pure interpretation (meaning, executing the bytecode as-is, without modification).
+动态编译使你的程序可以应对在不同负载和行为下对新优化的需求。这也是为什么动态编译器非常适合Java运行时。这里需要注意的地方是，动态编译器需要动用额外的数据结构、线程资源和CPU指令周期，才能收集运行时信息和优化的工作。若想完成更高级点的优化工作，就需要更多的资源。但是在大多数运行环境中，相对于获得的性能提升来说，动态编译的带来的性能损耗其实是非常小的 —— 动态编译后的代码的运行效率可以比纯解释执行（即按照字节码运行，不做任何修改）快5到10倍。
 
 
 #Allocation leads to garbage collection#
