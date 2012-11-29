@@ -67,7 +67,9 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 动态编译使你的程序可以应对在不同负载和行为下对新优化的需求。这也是为什么动态编译器非常适合Java运行时。这里需要注意的地方是，动态编译器需要动用额外的数据结构、线程资源和CPU指令周期，才能收集运行时信息和优化的工作。若想完成更高级点的优化工作，就需要更多的资源。但是在大多数运行环境中，相对于获得的性能提升来说，动态编译的带来的性能损耗其实是非常小的 —— 动态编译后的代码的运行效率可以比纯解释执行（即按照字节码运行，不做任何修改）快5到10倍。
 
 
-#Allocation leads to garbage collection#
+#内存分配与垃圾回收#
+
+
 
 `Allocation` is done on a per-thread basis in each "Java process dedicated memory address space," also known as the Java heap, or heap for short. Single-threaded allocation is common in the client-side application world of Java. Single-threaded allocation quickly becomes non-optimal in the enterprise application and workload-serving side, however, because it doesn't take advantage of the parallelism in modern multicore environments.
 
