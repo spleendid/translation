@@ -68,13 +68,11 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 
 
 #内存分配与垃圾回收#
+`内存分配`是以线程为单位，在“Java进程专有内存地址空间”中，也就是Java堆中分配的。在普通的客户端Java应用程序中，内存分配都是单线程进行的。但是，在企业级应用程序和服务器端应用程序中，单线程内存分配却并不是个好办法，因为它无法充分利用现代多核时代的并行特性。
+
+并行应用程序设计要求JVM确保多线程内存分配不会在同一时间将同一块地址空间分配给多个线程。你可以在整个内存空间中加锁来解决这个问题，但是这个方法（即所谓的“堆锁”）开销较大，因为它迫使所有线程在分配内存时逐个执行，对资源利用和应用程序性能有较大影响。多核程序的一个额外特点是需要有新的资源分配方案，避免出现单线程、序列化资源分配的性能瓶颈。
 
 
-
-`Allocation` is done on a per-thread basis in each "Java process dedicated memory address space," also known as the Java heap, or heap for short. Single-threaded allocation is common in the client-side application world of Java. Single-threaded allocation quickly becomes non-optimal in the enterprise application and workload-serving side, however, because it doesn't take advantage of the parallelism in modern multicore environments.
-
-
-Parallell application design also forces the JVM to ensure that multiple threads do not allocate the same address space at the same time. You could control this by putting a lock on the entire allocation space. But this technique (a so-called heap lock) comes at a cost, as holding or queuing threads can cause a performance hit to resource utilization and application performance. A plus side of multicore systems is that they've created a demand for various new approaches to resource allocation in order to prevent the bottlenecking of single-thread, serialized allocation.
 
 A common approach is to divide the heap into several partitions, where each partition is of a "decent size" for the application -- obviously something that would need tuning, as allocation rate and object sizes vary significantly for different applications, as well as by number of threads. A Thread Local Allocation Buffer (TLAB), or sometimes Thread Local Area (TLA), is a dedicated partition that a thread allocates freely within, without having to claim a full heap lock. Once the area is full, the thread is assigned a new area until the heap runs out of areas to dedicate. When there's not enough space left to allocate the heap is "full," meaning the empty space on the heap is not large enough for the object that needs to be allocated. When the heap is full, garbage collection kicks in.
 
