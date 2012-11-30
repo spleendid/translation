@@ -72,10 +72,7 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 
 并行应用程序设计要求JVM确保多线程内存分配不会在同一时间将同一块地址空间分配给多个线程。你可以在整个内存空间中加锁来解决这个问题，但是这个方法（即所谓的“堆锁”）开销较大，因为它迫使所有线程在分配内存时逐个执行，对资源利用和应用程序性能有较大影响。多核程序的一个额外特点是需要有新的资源分配方案，避免出现单线程、序列化资源分配的性能瓶颈。
 
-
-
-A common approach is to divide the heap into several partitions, where each partition is of a "decent size" for the application -- obviously something that would need tuning, as allocation rate and object sizes vary significantly for different applications, as well as by number of threads. A Thread Local Allocation Buffer (TLAB), or sometimes Thread Local Area (TLA), is a dedicated partition that a thread allocates freely within, without having to claim a full heap lock. Once the area is full, the thread is assigned a new area until the heap runs out of areas to dedicate. When there's not enough space left to allocate the heap is "full," meaning the empty space on the heap is not large enough for the object that needs to be allocated. When the heap is full, garbage collection kicks in.
-
+常用的解决方案是将堆划分为几个区域，每个区域都有适当的大小，当然具体的大小需要根据实际情况做相应的调整，因为不同应用程序之间，内存分配速率、对象大小和线程数量的差别是非常大的。Thread Local Allocation Buffer（TLAB），有时也称为Thraed Local Area（TLA），是线程自己使用的专用内存分配区域，在使用的时候无需获取堆锁。当这个区域用满的时候，线程会申请新的区域，直到堆中所有预留的区域都用光了。当堆中没有足够的空间来分配内存时，堆就“满”了，即堆上剩余的空间装不下待分配空间的对象。当堆满了的时候，垃圾回收就开始了。
 
 #Fragmentation#
 
