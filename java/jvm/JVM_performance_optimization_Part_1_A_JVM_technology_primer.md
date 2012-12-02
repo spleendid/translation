@@ -1,4 +1,4 @@
-JVM性能优化， Part 1 —— JVM简介
+JVM性能优化， Part 1 ―― JVM简介
 ================================================================
 
 原文地址    [http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html](http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html)
@@ -18,7 +18,7 @@ JVM性能优化， Part 1 —— JVM简介
 
 #Java的性能与“一次编写，到处运行”的挑战#
 
-有不少人认为，Java平台本身就挺慢。其主要观点简单来说就是，Java性能低已经有些年头了 —— 最早可以追溯到Java第一次用于企业级应用程序开发的时候。但这早就是老黄历了。事实是，如果你对不同的开发平台上运行简单的、静态的、确定性任务的运行结果做比较，你就会发现使用经过机器级优化（machine-optimized）代码的平台比任何使用虚拟环境进行运算的都要强，JVM也不例外。但是，在过去的10年中，Java的性能有了大幅提升。市场上不断增长的需求催生了垃圾回收算法的出现和编译技术的革新，在不断探索与优化的过程中，JVM茁壮成长。在这个系列文章中，我将介绍其中的一些内容。
+有不少人认为，Java平台本身就挺慢。其主要观点简单来说就是，Java性能低已经有些年头了 ―― 最早可以追溯到Java第一次用于企业级应用程序开发的时候。但这早就是老黄历了。事实是，如果你对不同的开发平台上运行简单的、静态的、确定性任务的运行结果做比较，你就会发现使用经过机器级优化（machine-optimized）代码的平台比任何使用虚拟环境进行运算的都要强，JVM也不例外。但是，在过去的10年中，Java的性能有了大幅提升。市场上不断增长的需求催生了垃圾回收算法的出现和编译技术的革新，在不断探索与优化的过程中，JVM茁壮成长。在这个系列文章中，我将介绍其中的一些内容。
 
 JVM技术中最迷人的地方也正是其最具挑战性的地方：“一次编写，到处运行”。JVM并不对具体的用例、应用程序或用户负载进行优化，而是在应用程序运行过程中不断收集运行时信息，并以此为根据动态的进行优化。这种动态的运行时特性带来了很多动态问题。在设计优化方案时，以JVM为工作平台的程序无法依靠静态编译和可预测的内存分配速率（predictable allocation rates）对应用程序做性能评估，至少在对生产环境进行性能评估时是不行的。
 
@@ -27,7 +27,7 @@ JVM技术中最迷人的地方也正是其最具挑战性的地方：“一次�
 * 编码简单，易于实现（意味着可以更快的推向市场）
 * 有很多非常有才的程序员
 * 使用Java API和标准库实现快速开发
-* 可移植性 —— 无需为每个平台都编写一套代码
+* 可移植性 ―― 无需为每个平台都编写一套代码
 
 
 #从源代码到字节码#
@@ -53,7 +53,7 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 关于JVM内部原理与性能优化有很多内容可写。作为这个系列的开篇文章，我简单介绍JVM的内部组件。这个简要介绍对于那些JVM新手比较有帮助，也是为后面的深入讨论做个铺垫。
 
 
-##从一种语言到另一种 —— 关于Java编译器##
+##从一种语言到另一种 ―― 关于Java编译器##
 
 `编译器`以一种语言为输入，生成另一种可执行语言作为输出。Java编译器主要完成2个任务：
 
@@ -64,7 +64,7 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 
 *动态编译器*，如使用[Just-In-Time(JIT，即是编译)][5]技术的编译器，会动态的将一种编程语言编译为另一种语言，这个过程是在程序运行中同时进行的。JIT编译器会收集程序的运行时数据（在程序中插入性能计数器），再根据运行时数据和当前运行环境数据动态规划编译方案。动态编译可以生成更好的序列指令，使用更有效率的指令集合替换原指令集合，或剔除冗余操作。收集到的运行时数据的越多，动态编译的效果就越好；这通常称为代码优化或重编译。
 
-动态编译使你的程序可以应对在不同负载和行为下对新优化的需求。这也是为什么动态编译器非常适合Java运行时。这里需要注意的地方是，动态编译器需要动用额外的数据结构、线程资源和CPU指令周期，才能收集运行时信息和优化的工作。若想完成更高级点的优化工作，就需要更多的资源。但是在大多数运行环境中，相对于获得的性能提升来说，动态编译的带来的性能损耗其实是非常小的 —— 动态编译后的代码的运行效率可以比纯解释执行（即按照字节码运行，不做任何修改）快5到10倍。
+动态编译使你的程序可以应对在不同负载和行为下对新优化的需求。这也是为什么动态编译器非常适合Java运行时。这里需要注意的地方是，动态编译器需要动用额外的数据结构、线程资源和CPU指令周期，才能收集运行时信息和优化的工作。若想完成更高级点的优化工作，就需要更多的资源。但是在大多数运行环境中，相对于获得的性能提升来说，动态编译的带来的性能损耗其实是非常小的 ―― 动态编译后的代码的运行效率可以比纯解释执行（即按照字节码运行，不做任何修改）快5到10倍。
 
 
 #内存分配与垃圾回收#
@@ -74,26 +74,26 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 
 常用的解决方案是将堆划分为几个区域，每个区域都有适当的大小，当然具体的大小需要根据实际情况做相应的调整，因为不同应用程序之间，内存分配速率、对象大小和线程数量的差别是非常大的。Thread Local Allocation Buffer（TLAB），有时也称为Thraed Local Area（TLA），是线程自己使用的专用内存分配区域，在使用的时候无需获取堆锁。当这个区域用满的时候，线程会申请新的区域，直到堆中所有预留的区域都用光了。当堆中没有足够的空间来分配内存时，堆就“满”了，即堆上剩余的空间装不下待分配空间的对象。当堆满了的时候，垃圾回收就开始了。
 
-#Fragmentation#
+#碎片化#
 
-A catch with the use of TLABs is the risk of inducing memory inefficiency by fragmenting the heap. If an application happens to allocate object sizes that do not add up to or fully allocate a TLAB size, there is a risk that a tiny empty space too small to host a new object will be left. This leftover space is referred to as a "fragment." If the application also happens to keep references to objects that are allocated next to these leftover spaces then the space could remain un-used for a long time.
+使用TLAB的一个风险是，由于堆上内存碎片的增加，使用内存的效率会下降。如果应用程序创建的对象的大小无法填满TLAB，而这块TLAB中剩下的空间又太小，无法分配给新的对象，那么这块空间就被浪费了，这就是所谓的“碎片”。如果“碎片”周围已分配出去的内存长时间无法回收，那么这块碎片研究长时间无法得到利用。
 
-Fragmentation is what happens when fragments are scattered over the heap -- wasting heap space with tiny pieces of un-used memory. Configuring the "wrong" TLAB size for your application allocation behavior (with regard to object sizes and mix of object sizes and reference holding rate) is one path to an increasingly fragmented heap. As the application continues to run, the number of wasted fragmented spaces will come to hold an increasing portion of the free memory on the heap. Fragmentation causes decreased performance as the system is unable to allocate enough space for new application threads and objects. The garbage collector subsequently works harder to prevent out-of-memory exceptions.
+`碎片化`是指堆上存在了大量的`碎片`，由于这些小碎片的存在而使堆无法得到有效利用，浪费了堆空间。为应用程序设置TLAB的大小时，若是没有对应用程序中对象大小和生命周期和合理评估，导致TLAB的大小设置不当，就会是使堆逐渐碎片化。随着应用程序的运行，被浪费的碎片空间会逐渐增多，导致应用程序性能下降。这是因为系统无法为新线程和新对象分配空间，于是为防止出现OOM（out-of-memory）错误，而频繁GC的缘故。
 
-TLAB waste can be worked around. One way to temporarily or completely avoid fragmentation is to tune TLAB size on a per-application basis. This approach typically requires re-tuning as soon as your application allocation behavior changes. It is also possible to use sophisticated JVM algorithms and other approaches to organize heap partitions for more efficient memory allocation. For instance, a JVM could implement free-lists, which are linked lists of free memory chunks of specific sizes. A consecutive free chunk of memory is linked to a linked list of other chunks of a similar size, thus creating a handful of lists, each with its own size range. In some case using free-lists leads to a better fitted-memory allocation approach. Threads allocating a certain-sized object are enabled to allocate it in chunks close to the object's size, generating potentially less fragmentation than if you just relied on fixed-sized TLABs.
+对于TLAB产生的空间浪费这个问题，可以采用“曲线救国”的策略来解决。例如，可以根据应用程序的具体环境调整TLAB的大小。这个方法既可以临时，也可以彻底的避免堆空间的碎片化，但需要随着应用程序内存分配行为的变化而修改TLAB的值。此外，还可以使用一些复杂的JVM算法和其他的方法来组织堆空间来获得更有效率的内存分配行为。例如，JVM可以实现空闲列表（free-list），空闲列表中保存了堆中指定大小的空闲块。具有类似大小空闲块保存在一个空闲列表中，因此可以创建多个空闲列表，每个空闲列表保存某个范围内的空闲块。在某些事例中，使用空闲列表会比使用按实际大小分配内存的策略更有效率。线程为某个对象分配内存时，可以在空闲列表中寻找与对象大小最接近的空间块使用，相对于使用固定大小的TLAB，这种方法更有利于避免碎片化的出现。
 
->#GC trivia#
->
->Some early garbage collectors had multiple old generations, but it emerged that more than two old generation spaces resulted in more overhead than value.
+>#GC往事#
+>早期的垃圾回收器有多个老年代，但实际上，存在多个老年代是利大于弊的。
 
-Another way to optimize allocation versus fragmentation is to create a so-called young generation, which is a dedicated heap area (e.g., address space) where you will allocate all new objects. The rest of the heap becomes the so-called old generation. The old generation is left for the allocation of longer lived objects, meaning objects that have survived garbage collection or large objects that are assumed to live for a very long time. In order to better understand this approach to allocation we need to talk a bit about garbage collection.
+另一种对抗碎片化的方法是创建一个所谓的年轻代，在这个专有的堆空间中，保存了所有新创建的对象。堆空间中剩余的空间就是所谓的老年代。老年代用于保存具有较长生命周期的对象，即当对象能够挺过几轮GC而不被回收，或者对象本身很大（一般来说，大对象都具有较长的寿命周期）时，它们就会被保存到老年代。为了让你能够更好的理解这个方法，我们有必要谈谈垃圾回收。
 
-#Garbage collection and application performance
+#垃圾回收与应用程序性能#
 
-Garbage collection is the operation performed by the JVM's garbage collector to free up occupied heap memory that is no longer referenced. When a garbage collection is first triggered, all objects that are still referenced are kept, and the space occupied by previously referenced objects is freed or reclaimed. When all reclaimable memory has been collected, the space is up for grabs and ready to be allocated again by new objects.
+垃圾回收就是JVM释放那些没有引用指向的堆内存的操作。当垃圾回收首次触发时，有引用指向的对象会被保存下来，那些没有引用指向的对象占用的空间会被回收。当所有可回收的内存都被回收后，这些空间就可以被分配给新的对象了。
+
+垃圾回收不会回收仍有引用指向的对象；否则就会违反JVM规范。这个规则有一个例外，就是对软引用或弱引用的使用，当垃圾回收器发现内存快要用完时，会回收只有软引用或[弱引用][14]指向的对象所占用的内存。我的建议是，尽量避免使用弱引用，因为Java规范中存在的模糊的表述可能会使你对弱引用的使用产生误解。此外，Java本身是动态内存管理的，你没必要考虑什么时候该释放哪块内存。
 
 
-A garbage collector should never reclaim a referenced object; doing so would break the JVM standard specification. An exception to this rule is a soft or [weak reference][14] (if defined as such) that could be collected if the garbage collector were approaching a state of running out of memory. I strongly recommend that you try to avoid weak references as much as possible, however, because ambiguity in the Java specification has led to misinterpretation and error in their use. And besides, Java is designed for dynamic memory management, so you shouldn't have to think about where and when memory should be released.
 
 The challenge for a garbage collector is to reclaim memory without impacting running applications more than necessary. If you don't garbage-collect enough, your application will run out of memory; if you collect too frequently you'll lose throughput and response time, which will negatively impact running applications.
 
