@@ -13,7 +13,7 @@ JVM性能优化， Part 1 ―― JVM简介
 
 >*JVM职业生涯*
 >
->在我职业生涯的早期，垃圾回收的问题曾经很难解决。垃圾回收问题和JVM的跨平台问题我更加为JVM和中间件的相关技术而着迷。我对JVM的热情源于十年前在[JRockit][1]团队工作的经历，当时要编码实现一种新的、能够自动学习、自动调优的垃圾回收算法（参见[相关资源][5]）。从那个项目开始，我踏上了JVM技术之旅，期间在BEA System公司工作的很多年，与Intel公司和Sun公司有过合作关系，在Oracle收购BEA公司和Sun公司之后为Oracle工作了一年。另外，我的硕士论文深入分析了JRockit的试验性特性，为[Deterministic Garbage Collection算法][2]打下了基础。当我加入Azul公司的团队后，我的工作陷入僵局，负责管理维护[Zing JVM][3]的垃圾回收算法（My work came full circle when I joined the team at Azul Systems and got to manage Zing JVM with its unique approach to garbage collection.）。现在我的工作有了一点小变化，负责日程安排与资源管理，关注分布式的可伸缩数据处理框架，目前在Cloudera公司工作，负责开源项目[Hadoop][4]的开发。
+>在我职业生涯的早期，垃圾回收的问题曾经很难解决。垃圾回收问题和JVM的跨平台问题我更加为JVM和中间件的相关技术而着迷。我对JVM的热情源于十年前在[JRockit][1]团队工作的经历，当时要编码实现一种新的、能够自动学习、自动调优的垃圾回收算法（参见[相关资源][5]）。从那个项目开始，我踏上了JVM技术之旅，期间在BEA System公司工作的很多年，与Intel公司和Sun公司有过合作关系，在Oracle收购BEA公司和Sun公司之后为Oracle工作了一年。另外，我的硕士论文深入分析了JRockit的试验性特性，为[Deterministic Garbage Collection算法][2]打下了基础。当我加入Azul公司的团队后，我回到了熟悉的工作中，负责管理维护[Zing JVM][3]的垃圾回收算法。现在我的工作有了一点小变化，负责日程安排与资源管理，关注分布式的可伸缩数据处理框架，目前在Cloudera公司工作，负责开源项目[Hadoop][4]的开发。
 
 
 #Java的性能与“一次编写，到处运行”的挑战#
@@ -93,42 +93,35 @@ JVM也可以在运行java应用程序时，很好的管理动态资源。这指�
 
 垃圾回收不会回收仍有引用指向的对象；否则就会违反JVM规范。这个规则有一个例外，就是对软引用或弱引用的使用，当垃圾回收器发现内存快要用完时，会回收只有软引用或[弱引用][14]指向的对象所占用的内存。我的建议是，尽量避免使用弱引用，因为Java规范中存在的模糊的表述可能会使你对弱引用的使用产生误解。此外，Java本身是动态内存管理的，你没必要考虑什么时候该释放哪块内存。
 
+对于垃圾回收来说，挑战在于，如何将垃圾回收对应用程序造成的影响降到最小。如果垃圾回收执行的不充分，那么应用程序迟早会发生OOM错误；如果垃圾回收执行的太频繁，会对应用程序的吞吐量和响应时间造成影响，当然，这都不是好的影响。
 
+#GC算法#
 
-The challenge for a garbage collector is to reclaim memory without impacting running applications more than necessary. If you don't garbage-collect enough, your application will run out of memory; if you collect too frequently you'll lose throughput and response time, which will negatively impact running applications.
+目前已经出现了很多垃圾回收算法。在这个系列文章中将对其中的一些进行介绍。概括来说，垃圾回收主要有两种方式，引用计数（reference counting）和引用追踪（reference tracing）。
 
-#GC algorithms#
+* 引用计数垃圾回收器会记录指向某个对象的引用的数目。当指向某个对象引用数位0时，该对象占用的内存就可以被回收了，这是引用计数垃圾回收的一个主要优点。使用引用计数垃圾回收的需要克服的难点在于如何解决循环引用带来的问题，以及如何保证引用计数的实效性。
+* 引用追踪垃圾回收器会标记所有仍有引用指向的对象，并从已标记的对象出发，继续标记这些对象指向的对象。当所有仍有引用指向的对象都被标记为“live”后，所有未标记的对象会被回收。这种方式可以解决循环引用结果带来的问题，但是大多数情况下，垃圾回收器必须等待标记完全结束才能开始进行垃圾回收。
 
-There are many different garbage collection algorithms. Later in this series we will deep dive into a few. On the highest level, the main two approaches to garbage collection are reference counting and tracing collectors.
+上面提到的两种算法有多种不同的实现方法，其中最著名可算是标记或拷贝算法（marking or copying algorithm）和并发或并发算法（parallel or concurrent algorithm）。我将在后续的文章中对它们进行介绍。
 
-* Reference counting collectors keep track of how many references an object has pointing to it. Once the count for an object becomes zero, the memory can immediately be reclaimed, which is one of the advantages of this approach. The difficulties with a reference-counting approach are circular structures and keeping all the reference counts up to date.
-* Tracing collectors mark each object that is still referenced, iteratively following and marking all objects referenced by already marked objects. Once all still referenced objects are marked "live," all non-marked space can be reclaimed. This approach handles circular structures, but in most cases the collector has to wait until marking is complete before it can reclaim the unreferenced memory.
+分代垃圾回收的意思是，将堆划分为几个不同的区域，分别用于存储新对象和老对象。其中“老对象”指的是挺过了几轮垃圾回收而不死的对象。将堆空间分为年轻代和老年代，分别用于存储新对象和老对象可以通过回收生命周期较短的对象，并将生命周期较长的对象从年轻代提升到老年代的方法来减少堆空间中的碎片，降低堆空间碎片化的风险。此外，使用年轻代还有一个好处是，它可以推出对老年代进行垃圾回收的需求（对老年代进行垃圾回收的代价比较大，因为老年代中那些生命周期较长的对象通常包含有更多的引用，遍历一次需要花费更多的时间），因那些生命周期较短的对通常会重用年轻代中的空间。
 
-There are different ways to implement the above approaches. The more famous algorithms are marking or copying algorithms and parallel or concurrent algorithms. I'll talk about these in detail later in the series.
+还有一个值得一提的算法改进是压缩，它可以用来管理堆空间中的碎片。基本上将，压缩就是将对象移动到一起，再释放掉较大的连续空间。如果你对磁盘碎片和处理磁盘碎片的工具比较熟悉的话你就会理解压缩的含义了，只不过这里的压缩是工作在Java堆空间中的。我将在该系列后续的内容中对压缩进行介绍。
 
-Generational garbage collection means dedicating separate address spaces on the heap for new objects and older ones. By "older objects" I mean objects that have survived a number of garbage collections. Having a young generation for new allocations and an old generation for surviving objects reduces fragmentation by quickly reclaiming memory occupied by short-lived objects, and by moving long-living objects closer together as they are promoted to the old generation address space. All of this reduces the the risk of fragments between long-living objects and protects the heap from fragmentation. A positive side-effect of having a young generation is also that it delays the need for the more costly collection of the old generation, as you are constantly reusing the same space for short-lived objects. (Old-space collection is more costly because the long-lived objects that live there contain more references to be traversed.)
+#结论：回顾与展望#
 
+JVM实现了可移植性（“一次编写，到处运行”）和动态内存管理，这两个特点也是其广受欢迎，并且具有较高生产力的原因。
 
-A final algorithm improvement worth mentioning is compaction, which is a way to manage heap fragmentation. Compaction basically means moving objects together to free up larger consecutive chunks of memory. If you are familiar with disk fragmentation and the tools for handling it then you will find that compaction is similar, but works on Java heap memory. I'll discuss compaction in more detail later in this series.
+作为这个系列文章的第一篇，我介绍了编译器如何将字节码转换为平台相关指令的语言，以及如何`动态`优化Java程序的运行性能。不同的编译器迎合了不同应用程序的需要。
 
-#In conclusion: Reflection points and highlights#
+此外，简单介绍了内存分配和垃圾回收的一点内容，及其与Java应用程序性能的关系。基本上将，Java应用程序运行的速度越快，填满Java堆所需的时间就越短，触发垃圾回收的频率也越高。这里遇到的问题就是，在应用程序出现OOM错误之前，如何在对应用程序造成的影响尽可能小的情况下，回收足够多的内存空间。将后续的文章中，我们将对传统垃圾回收方法和现今的垃圾回收方法对JVM性能优化的影响做详细讨论。
 
-A JVM enables portability ("write once, run anywhere") and dynamic memory management, both key features of the Java platform and reasons for its popularity and productivity.
-
-In this first article in the JVM performance optimization series I've explained how a compiler translates bytecode to target-platform instruction languages and helps optimize the execution of your Java program `dynamically`. There are different compilers for different application needs.
-
-I've also briefly discussed memory allocation and garbage collection, and how both relate to Java application performance. Basically, the higher the allocation rate of a Java application, the faster your heap fills up and the more frequently garbage collection is triggered. The challenge of garbage collection is to reclaim enough memory for your application needs without impacting running applications more than necessary, but to do so before the application runs out of memory. In future articles we'll explore the details of both traditional and more novel approaches to garbage collection for JVM performance optimization.
-
-#About the author#
-
-Eva Andreasson has been involved with Java virtual machine technologies, SOA, cloud computing, and other enterprise middleware solutions for 10 years. She joined the startup Appeal Virtual Solutions (later acquired by BEA Systems) in 2001 as a developer of the JRockit JVM. Eva has been awarded two patents for garbage collection heuristics and algorithms. She also pioneered Deterministic Garbage Collection which later became productized through JRockit Real Time. Eva has worked closely with Sun and Intel on technical partnerships, as well as various integration projects of JRockit Product Group, WebLogic, and Coherence (post Oracle acquisition in 2008). In 2009 Eva joined [Azul Systems][15] as product manager for the new Zing Java Platform. Recently she switched gears and joined the team at [Cloudera][16] as senior product manager for Cloudera's Hadoop distribution, where she is engaged in the exciting future and innovation path of highly scalable, distributed data processing frameworks.
-
-[Read more about Core Java][17] in JavaWorld's Core Java section.
-
+#关于作者#
+Eva Andearsson对JVM计数、SOA、云计算和其他企业级中间件解决方案有着10多年的从业经验。在2001年，她以JRockit JVM开发者的身份加盟了创业公司Appeal Virtual Solutions（即BEA公司的前身）。在垃圾回收领域的研究和算法方面，EVA获得了两项专利。此外她还是提出了确定性垃圾回收（Deterministic Garbage Collection），后来形成了JRockit实时系统（JRockit Real Time）。在技术上，Eva与SUn公司和Intel公司合作密切，涉及到很多将JRockit产品线、WebLogic和Coherence整合的项目。2009年，Eva加盟了[Azul System][15]公，担任产品经理。负责新的Zing Java平台的开发工作。最近，她改换门庭，以高级产品经理的身份加盟[Cloudera][16]公司，负责管理Cloudera公司Hadoop分布式系统，致力于高扩展性、分布式数据处理框架的开发。
 
 #相关资源
 
-* ["To Colelct or Not To Collect"][7] (Eva Andreasson, Frank Hoffmann, Olof Lindholm; JVM-02: Proceedings of the Java Virtual Machine Research and Technology Symposium, 2002): 文章介绍了作者对自适应决策过程的研究，改过程用于确定应该使用哪种垃圾回收器技术，以及如何应用该技术。
+* ["To Colelct or Not To Collect"][7] (Eva Andreasson, Frank Hoffmann, Olof Lindholm; JVM-02: Proceedings of the Java Virtual Machine Research and Technology Symposium, 2002): 文章介绍了作者对自适应决策过程的研究，该过程用于确定应该使用哪种垃圾回收器技术，以及如何应用该技术。
 * ["Reinforcement Learning for a dynamic JVM"][8] (Eva Andreasson, KTH Royal Institute of Technology, 2002): 一篇硕士论文，介绍了如何运用增强学习（reinforcement learning）优化决策，以决定对于一个动态工作负载来说，何时开始垃圾回收的决策更加合适。   
 * ["Deterministic Garbage Collection: Unleash the Power of Java with Oracle JRockit Real Time"][9] (An Oracle White Paper, August 2008): 介绍了更多JRockit实时（JRockit Real Time）系统中Deterministic Garbage Collection算法的内容。
 * ["Why is Java faster when using a JIT vs. compiling to machine code?"][10] (Stackoverflow, December 2009): 一个关于JIT的讨论。
@@ -155,4 +148,3 @@ Eva Andreasson has been involved with Java virtual machine technologies, SOA, cl
 [14]: http://java.sun.com/docs/books/performance/1st_edition/html/JPAppGC.fm.html  "weak reference"
 [15]: http://www.azulsystems.com/  "Azul Systems"
 [16]: http://www.cloudera.com/company/  "Cloudera"
-[17]: http://www.javaworld.com/channel_content/jw-core-index.html  "Read more about Core Java"
