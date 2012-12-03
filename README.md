@@ -1,6 +1,6 @@
 Translation
 ===========
 
-Some translation from English to Chinese, include articles, paper, and books, etc.
+Some translation from English to Chinese, include articles, papers, books, and etc.
 
 Author: caoxudong818@gmail.com
