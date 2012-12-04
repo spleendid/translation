@@ -125,7 +125,6 @@ A server compiler accounts for more profiling data than a client-side compiler d
 The chart schema in Figure 1 depicts the performance differences between pure interpretation, client-side, server-side, and tiered compilation. The X-axis shows execution time (time unit) and the Y-axis performance (ops/time unit).
 
 ![Figure 1. Performance differences between compilers](images/jvmseries2-fig1.png?raw=true "Figure 1. Performance differences between compilers")
-
 *Figure 1. Performance differences between compilers*
 
 
