@@ -126,6 +126,8 @@ The chart schema in Figure 1 depicts the performance differences between pure in
 
 ![Figure 1. Performance differences between compilers](images/jvmseries2-fig1.png?raw=true "Figure 1. Performance differences between compilers")
 
+*Figure 1. Performance differences between compilers*
+
 
 ##Compiler performance comparisons##
 
