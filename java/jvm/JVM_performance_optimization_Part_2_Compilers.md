@@ -1,12 +1,12 @@
-JVMĞÔÄÜÓÅ»¯£¬ Part 2 ¡ª¡ª ±àÒëÆ÷
+JVMæ€§èƒ½ä¼˜åŒ–ï¼Œ Part 2 â€•â€• ç¼–è¯‘å™¨
 ================================================================
 
-Ô­ÎÄµØÖ·    [http://www.javaworld.com/javaworld/jw-09-2012/120905-jvm-performance-optimization-compilers.html][1]
+åŸæ–‡åœ°å€    [http://www.javaworld.com/javaworld/jw-09-2012/120905-jvm-performance-optimization-compilers.html][1]
 
 
 >Java compilers take center stage in this second article in the [JVM performance optimization][2] series. Eva Andreasson introduces the different breeds of compiler and compares performance results from client, server, and tiered compilation. She concludes with an overview of common JVM optimizations such as dead-code elimination, inlining, and loop optimization.
 
->×÷Îª[JVMĞÔÄÜÓÅ»¯][2]ÏµÁĞÎÄÕÂµÄµÚ2Æª£¬±¾ÎÄ½«×ÅÖØ½éÉÜJava±àÒëÆ÷¡£
+>ä½œä¸º[JVMæ€§èƒ½ä¼˜åŒ–][2]ç³»åˆ—æ–‡ç« çš„ç¬¬2ç¯‡ï¼Œæœ¬æ–‡å°†ç€é‡ä»‹ç»Javaç¼–è¯‘å™¨ã€‚
 
 A Java compiler is the source of Java's famous platform independence. A software developer writes the best Java application that he or she can, and then the compiler works behind the scenes to produce efficient and well-performing execution code for the intended target platform. Different kinds of compilers meet various application needs, thus yielding specific desired performance results. The more that you understand about compilers, in terms of how they work and what kinds are available, the more you'll be able to optimize Java application performance.
 
@@ -271,8 +271,8 @@ Oracle JRockit: The Definitive Guide (Marcus Hirt, Marcus Lagergren; Packt Publi
 
 
 [1]:  http://www.javaworld.com/javaworld/jw-09-2012/120905-jvm-performance-optimization-compilers.html  "http://www.javaworld.com/javaworld/jw-09-2012/120905-jvm-performance-optimization-compilers.html"
-[2]:  http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html  "JavaĞÔÄÜÓÅ»¯"
-[3]:  http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html  "JavaĞÔÄÜÓÅ»¯£¬µÚ1²¿·Ö"
-[4]:  http://www.javaworld.com/javaworld/jw-09-1996/jw-09-bytecodes.html  "×Ö½ÚÂë»ù´¡"
-[5]:  http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html  "¾²Ì¬Óë¶¯Ì¬±àÒëÆ÷"
+[2]:  http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html  "Javaæ€§èƒ½ä¼˜åŒ–"
+[3]:  http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html  "Javaæ€§èƒ½ä¼˜åŒ–ï¼Œç¬¬1éƒ¨åˆ†"
+[4]:  http://www.javaworld.com/javaworld/jw-09-1996/jw-09-bytecodes.html  "å­—èŠ‚ç åŸºç¡€"
+[5]:  http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html  "é™æ€ä¸åŠ¨æ€ç¼–è¯‘å™¨"
 [6]:  http://www.javaworld.com/javaqa/2003-04/01-qa-0411-hotspot.html  "Watch your HotSpot compiler go"
