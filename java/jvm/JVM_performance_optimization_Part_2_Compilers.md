@@ -6,12 +6,12 @@ JVM性能优化， Part 2 ―― 编译器
 
 >作为[JVM性能优化][2]系列文章的第2篇，本文将着重介绍Java编译器。Eva Andreasson将对不同种类的编译器做介绍，并比较客户端、服务器端和层次编译产生的编译结果在性能上的区别，此外将对通用的JVM优化做介绍，包括死代码剔除、内联以及循环优化。
 
-A Java compiler is the source of Java's famous platform independence. A software developer writes the best Java application that he or she can, and then the compiler works behind the scenes to produce efficient and well-performing execution code for the intended target platform. Different kinds of compilers meet various application needs, thus yielding specific desired performance results. The more that you understand about compilers, in terms of how they work and what kinds are available, the more you'll be able to optimize Java application performance.
+Java编译器是Java编程语言能独立于平台的根本原因。软件开发者可以尽全力编写程序，然后由Java编译器将源代码编译为针对于特定平台的高效、可运行的代码。不同类型的编译器适合于不同应用程序的需求，使编译结果可以满足期望的性能要求。对编译器基本原理了解得越多，在优化Java应用程序性能时就越能得心应手。
 
-This second article in the *JVM performance optimization* series highlights and explains the differences between various Java virtual machine compilers. I'll also discuss some common optimizations used by Just-In-Time (JIT) compilers for Java. (See ["JVM performance optimization, Part 1"][3] for a JVM overview and introduction to the series.)
+作为*JVM性能优化*系列文章的第2篇，本文着重介绍JVM中的各种编译器，此外还将对JIT编译器常用的一些优化措施进行讨论。（参见["JVM性能优化，Part 1"][3]中对JVM的介绍。）
 
 
-#What is a compiler?#
+#什么是编译器#
 
 Simply speaking a compiler takes a programming language as an input and produces an executable language as an output. One commonly known compiler is `javac`, which is included in all standard Java development kits (JDKs). `javac` takes Java code as input and translates it into bytecode -- the executable language for a JVM. The bytecode is stored into .class files that are loaded into the Java runtime when the Java process is started.
 
