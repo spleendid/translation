@@ -4,9 +4,7 @@ JVM性能优化， Part 2 ―― 编译器
 原文地址    [http://www.javaworld.com/javaworld/jw-09-2012/120905-jvm-performance-optimization-compilers.html][1]
 
 
->Java compilers take center stage in this second article in the [JVM performance optimization][2] series. Eva Andreasson introduces the different breeds of compiler and compares performance results from client, server, and tiered compilation. She concludes with an overview of common JVM optimizations such as dead-code elimination, inlining, and loop optimization.
-
->作为[JVM性能优化][2]系列文章的第2篇，本文将着重介绍Java编译器。
+>作为[JVM性能优化][2]系列文章的第2篇，本文将着重介绍Java编译器。Eva Andreasson将对不同种类的编译器做介绍，并比较客户端、服务器端和层次编译产生的编译结果在性能上的区别，此外将对通用的JVM优化做介绍，包括死代码剔除、内联以及循环优化。
 
 A Java compiler is the source of Java's famous platform independence. A software developer writes the best Java application that he or she can, and then the compiler works behind the scenes to produce efficient and well-performing execution code for the intended target platform. Different kinds of compilers meet various application needs, thus yielding specific desired performance results. The more that you understand about compilers, in terms of how they work and what kinds are available, the more you'll be able to optimize Java application performance.
 
