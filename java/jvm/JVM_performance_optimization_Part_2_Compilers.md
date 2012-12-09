@@ -13,13 +13,15 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 #什么是编译器#
 
-Simply speaking a compiler takes a programming language as an input and produces an executable language as an output. One commonly known compiler is `javac`, which is included in all standard Java development kits (JDKs). `javac` takes Java code as input and translates it into bytecode -- the executable language for a JVM. The bytecode is stored into .class files that are loaded into the Java runtime when the Java process is started.
+简单来说，编译器就是将一种编程语言作为输入，输出另一种可执行语言的工具。大家都熟悉的`javac`就是一个编译器，所有标准版的JDK中都带有这个工具。`javac`以Java源代码作为输入，将其翻译为可由JVM执行的字节码。翻译后的字节码存储在.class文件中，在启动Java进程的时候，被载入到Java运行时中。
 
-Bytecode can't be read by standard CPUs and needs to be translated into an instruction language that the underlying execution platform can understand. The component in the JVM that is responsible for translating bytecode to executable platform instructions is yet another compiler. Some JVM compilers handle several levels of translation; for instance, a compiler might create various levels of intermediate representation of the bytecode before it turns into actual machine instructions, the final step of translation.
+普通CPU并不能识别字节码，它需要被转换为当前平台所能理解的本地指令。在JVM中，有专门的组件负责将字节码翻译为平台相关指令，实际上，这也是一种编译器。有些JVM编译器可以处理多层级的翻译工作，例如，编译器在最终将字节码转换为平台相关指令前，会为相关的字节码建立多层级的中间表示（intermediate representation）。
 
->*Bytecode and the JVM*
+>*字节码与JVM*
 >
->If you want to learn more about bytecode and the JVM, see ["Bytecode basics"][4] (Bill Venners, JavaWorld).
+>如果你想了解更多有关字节码与JVM的信息，请阅读 ["Bytecode basics"][4] (Bill Venners, JavaWorld)
+
+以平台未知的角度看，我们希望尽可能的保持平台独立性，因此，最后一级的翻译，也就是从最低级表示到实际机器码的转换，是与具体平台的处理器架构息息相关的。
 
 From a platform-agnostic perspective we want to keep code platform-independent as far as possible, so that the last translation level -- from the lowest representation to actual machine code -- is the step that locks the execution to a specific platform's processor architecture. The highest level of separation is between static and dynamic compilers. From there, we have options depending on what execution environment we're targeting, what performance results we desire, and what resource restrictions we need to meet. I briefly discussed [static and dynamic compilers][5] in Part 1 of this series. In the following sections I'll explain a bit more.
 
