@@ -21,27 +21,27 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 >
 >如果你想了解更多有关字节码与JVM的信息，请阅读 ["Bytecode basics"][4] (Bill Venners, JavaWorld)
 
-以平台未知的角度看，我们希望尽可能的保持平台独立性，因此，最后一级的翻译，也就是从最低级表示到实际机器码的转换，是与具体平台的处理器架构息息相关的。
-
-From a platform-agnostic perspective we want to keep code platform-independent as far as possible, so that the last translation level -- from the lowest representation to actual machine code -- is the step that locks the execution to a specific platform's processor architecture. The highest level of separation is between static and dynamic compilers. From there, we have options depending on what execution environment we're targeting, what performance results we desire, and what resource restrictions we need to meet. I briefly discussed [static and dynamic compilers][5] in Part 1 of this series. In the following sections I'll explain a bit more.
+以平台未知的角度看，我们希望尽可能的保持平台独立性，因此，最后一级的翻译，也就是从最低级表示到实际机器码的转换，是与具体平台的处理器架构息息相关的。在最高级的表示上，会因使用静态编译器还是动态编译器而有所区别。在这里，我们可以选择应用程序所以来的可执行环境，期望达到的性能要求，以及我们所面临的资源限制。在本系列的第1篇文章的[静态编译器与动态编译器][5]一节中，已经对此有过简要介绍。我将在本文的后续章节中详细介绍这部分内容。
 
 
-#Static vs dynamic compilation#
+#静态编译器与动态编译器#
 
-An example of a static compiler is the previously mentioned javac. With static compilers the input code is interpreted once and the output executable is in the form that will be used when the program is executed. Unless you make changes to your original source and recompile the code (using the compiler), the output will always result in the same outcome; this is because the input is a static input and the compiler is a static compiler.
+前文提到的javac就是使用静态编译器的例子。静态编译器解释输入的源代码，并输出程序运行时所需的可执行文件。如果你修改了源代码，那么就需要使用编译器来重新编译代码，否则输出的可执行性文件不会发生变化；这是因为静态编译器的输入是静态的普通文件。
 
-In a static compilation, the following Java code
+使用静态编译器时，下面的Java代码
 
     static int add7( int x ) {
         return x+7;
     }
 
-would result in something similar to this bytecode:
+会生成类似如下的字节码：
 
     iload0
     bipush 7
     iadd
     ireturn
+
+动态编译器会动态的将一种编程语言翻译为另一种，即在程序运行时执行编译工作。动态编译与优化使运行时可以根据当前应用程序的负载情况而做出相应的调整。
 
 A dynamic compiler translates from one language to another dynamically, meaning that it happens as the code is executed -- during runtime! Dynamic compilation and optimization give runtimes the advantage of being able to adapt to changes in application load. Dynamic compilers are very well suited to Java runtimes, which commonly execute in unpredictable and ever-changing environments. Most JVMs use a dynamic compiler such as a Just-In-Time (JIT) compiler. The catch is that dynamic compilers and code optimization sometimes need extra data structures, thread, and CPU resources. The more advanced the optimization or bytecode-context analyzing, the more resources are consumed by compilation. In most environments the overhead is still very small compared to the significant performance gain of the output code.
 
