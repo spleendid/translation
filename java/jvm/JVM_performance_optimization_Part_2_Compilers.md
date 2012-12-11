@@ -254,7 +254,7 @@ Eva Andreasson has been involved with Java virtual machine technologies, SOA, cl
 
 
 
-[#Resource#]{#resource}
+#Resource# {#resource}
 "JVM performance optimization, Part 1: A JVM technology primer" (Eva Andreasson, JavaWorld, August 2012) launches the JVM performance optimization series with an overview of how a classic Java virtual machine works, including Java's write-once, run-anywhere engine, garbage collection basics, and some common GC algorithms.
 See "Watch your HotSpot compiler go" (Vladimir Roubtsov, JavaWorld.com, April 2003) for more about the mechanics of hotspot optimization and why it pays to warm up your compiler.
 If you want to learn more about bytecode and the JVM, see "Bytecode basics" (Bill Venners, JavaWorld, 1996), which takes an initial look at the bytecode instruction set of the Java virtual machine, including primitive types operated upon by bytecodes, bytecodes that convert between types, and bytecodes that operate on the stack.
