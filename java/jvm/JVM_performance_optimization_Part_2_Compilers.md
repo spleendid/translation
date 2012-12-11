@@ -44,7 +44,7 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 动态编译器会动态的将一种编程语言编译为另一种，即在程序运行时执行编译工作。动态编译与优化使运行时可以根据当前应用程序的负载情况而做出相应的调整。动态编译器非常适合于用于Java运行时中，因为Java运行时通常运行在无法预测而又会随着运行而有所变动的环境中。大部分JVM都会使用诸如Just-In-Time编译器的动态编译器。这里面需要注意的是，大部分动态编译器和代码优化有时需要使用额外的数据结构、线程和CPU资源。要做的优化或字节码上下文分析越高级，编译过程所消耗的资源就越多。在大多数运行环境中，相比于经过动态编译和代码优化所获得的性能提升，这些损耗微不足道。
 
 >JVM的多样性与Java平台的独立性
->所有的JVM实现都有一个共同点，即它们都试图将应用程序的字节码转换为本地机器指令。一些JVM在载入应用程序后会解释执行应用程序，同时使用性能计数器来查找“热点”代码。还有一些JVM会调用解释执行的阶段，直接编译运行。资源密集型编译任务对应用程序来说可能会产生较大影响，尤其是那些客户端模式下运行的应用程序，但是资源密集型编译任务可以执行一些比较高级的优化任务。更多相关内容请参见[相关资源](#resource)
+>所有的JVM实现都有一个共同点，即它们都试图将应用程序的字节码转换为本地机器指令。一些JVM在载入应用程序后会解释执行应用程序，同时使用性能计数器来查找“热点”代码。还有一些JVM会调用解释执行的阶段，直接编译运行。资源密集型编译任务对应用程序来说可能会产生较大影响，尤其是那些客户端模式下运行的应用程序，但是资源密集型编译任务可以执行一些比较高级的优化任务。更多相关内容请参见[相关资源][7]
 >
 >如果你是Java初学者，JVM本身错综复杂结构会让你晕头转向的。不过，好消息是你无需精通JVM。JVM自己会做好代码编译和优化的工作，所以你无需关心如何针对目标平台架构来编写应用程序才能编译、优化，从而生成更好的本地机器指令。
 
@@ -56,12 +56,14 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 ##解释执行##
 
-The simplest form of bytecode compilation is called interpretation. An interpreter simply looks up the hardware instructions for every bytecode instruction and sends it off to be executed by the CPU.
+字节码编译的最简单形式称为解释。解释器查找每条字节码指令对应的硬件指令，再由CPU执行相应的硬件指令。
 
-You could think of interpretation similar to using a dictionary: for a specific word (bytecode instruction) there is an exact translation (machine code instruction). Since the interpreter reads and immediately executes one bytecode instruction at a time, there is no opportunity to optimize over an instructions set. An interpreter also has to do the interpretation every time a bytecode is invoked, which makes it fairly slow. Interpretation is an accurate way of executing code, but the un-optimized output instruction set will likely not be the highest-performing sequence for the target platform's processor.
+你可以将解释器想象为一个字典：每个单词（字节码指令）都有准确的解释（本地机器指令）。由于解释器每次读取一个字节码指令并立即执行，因此它就没有机会对某个指令集合进行优化。由于每次执行字节码时，解释器都需要做相应的解释工作，因此程序运行起来就很慢。解释执行可以准确执行字节码，但是未经优化而输出的指令集难以发挥目标平台处理器的最佳性能。
 
 
-##Compilation##
+##编译执行##
+
+
 
 A *compiler* on the other hand loads the entire code to be executed into the runtime. As it translates bytecode, it has ability to look at the entire or partial runtime context and make decisions about how to actually translate the code. Its decisions are based on analysis of code graphs such as different execution branches of instructions and runtime-context data.
 
@@ -137,7 +139,7 @@ Tiered compilation combines the best features of both compilers. Client-side com
 
 #Some common compiler optimizations#
 
-I've so far discussed the value of optimizing code and how and when common JVM compilers optimize code. I'll conclude with some of the actual optimizations available to compilers. JVM optimization actually happens at the bytecode level (or on lower representative language levels), but I'll demonstrate the optimizations using the Java language. I couldn't possibly cover all of the JVM optimizations in this section; rather, I mean to inspire you to explore on your own and learn about the hundreds of advanced optimizations and innovations in compiler technology (see [Resources](#resource)).
+I've so far discussed the value of optimizing code and how and when common JVM compilers optimize code. I'll conclude with some of the actual optimizations available to compilers. JVM optimization actually happens at the bytecode level (or on lower representative language levels), but I'll demonstrate the optimizations using the Java language. I couldn't possibly cover all of the JVM optimizations in this section; rather, I mean to inspire you to explore on your own and learn about the hundreds of advanced optimizations and innovations in compiler technology (see [Resources][7]).
 
 
 ##Dead code elimination##
@@ -273,3 +275,4 @@ Oracle JRockit: The Definitive Guide (Marcus Hirt, Marcus Lagergren; Packt Publi
 [4]:  http://www.javaworld.com/javaworld/jw-09-1996/jw-09-bytecodes.html  "字节码基础"
 [5]:  http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html  "静态与动态编译器"
 [6]:  http://www.javaworld.com/javaqa/2003-04/01-qa-0411-hotspot.html  "Watch your HotSpot compiler go"
+[7]:  https://github.com/caoxudong/translation/blob/master/java/jvm/JVM_performance_optimization_Part_2_Compilers.md#resource "相关资源"
