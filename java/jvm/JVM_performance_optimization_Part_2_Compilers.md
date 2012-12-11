@@ -15,13 +15,13 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 简单来说，编译器就是将一种编程语言作为输入，输出另一种可执行语言的工具。大家都熟悉的`javac`就是一个编译器，所有标准版的JDK中都带有这个工具。`javac`以Java源代码作为输入，将其翻译为可由JVM执行的字节码。翻译后的字节码存储在.class文件中，在启动Java进程的时候，被载入到Java运行时中。
 
-普通CPU并不能识别字节码，它需要被转换为当前平台所能理解的本地指令。在JVM中，有专门的组件负责将字节码翻译为平台相关指令，实际上，这也是一种编译器。有些JVM编译器可以处理多层级的翻译工作，例如，编译器在最终将字节码转换为平台相关指令前，会为相关的字节码建立多层级的中间表示（intermediate representation）。
+普通CPU并不能识别字节码，它需要被转换为当前平台所能理解的本地指令。在JVM中，有专门的组件负责将字节码编译为平台相关指令，实际上，这也是一种编译器。有些JVM编译器可以处理多层级的编译工作，例如，编译器在最终将字节码转换为平台相关指令前，会为相关的字节码建立多层级的中间表示（intermediate representation）。
 
 >*字节码与JVM*
 >
 >如果你想了解更多有关字节码与JVM的信息，请阅读 ["Bytecode basics"][4] (Bill Venners, JavaWorld)
 
-以平台未知的角度看，我们希望尽可能的保持平台独立性，因此，最后一级的翻译，也就是从最低级表示到实际机器码的转换，是与具体平台的处理器架构息息相关的。在最高级的表示上，会因使用静态编译器还是动态编译器而有所区别。在这里，我们可以选择应用程序所以来的可执行环境，期望达到的性能要求，以及我们所面临的资源限制。在本系列的第1篇文章的[静态编译器与动态编译器][5]一节中，已经对此有过简要介绍。我将在本文的后续章节中详细介绍这部分内容。
+以平台未知的角度看，我们希望尽可能的保持平台独立性，因此，最后一级的编译，也就是从最低级表示到实际机器码的转换，是与具体平台的处理器架构息息相关的。在最高级的表示上，会因使用静态编译器还是动态编译器而有所区别。在这里，我们可以选择应用程序所以来的可执行环境，期望达到的性能要求，以及我们所面临的资源限制。在本系列的第1篇文章的[静态编译器与动态编译器][5]一节中，已经对此有过简要介绍。我将在本文的后续章节中详细介绍这部分内容。
 
 
 #静态编译器与动态编译器#
@@ -41,23 +41,20 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
     iadd
     ireturn
 
-动态编译器会动态的将一种编程语言翻译为另一种，即在程序运行时执行编译工作。动态编译与优化使运行时可以根据当前应用程序的负载情况而做出相应的调整。
+动态编译器会动态的将一种编程语言编译为另一种，即在程序运行时执行编译工作。动态编译与优化使运行时可以根据当前应用程序的负载情况而做出相应的调整。动态编译器非常适合于用于Java运行时中，因为Java运行时通常运行在无法预测而又会随着运行而有所变动的环境中。大部分JVM都会使用诸如Just-In-Time编译器的动态编译器。这里面需要注意的是，大部分动态编译器和代码优化有时需要使用额外的数据结构、线程和CPU资源。要做的优化或字节码上下文分析越高级，编译过程所消耗的资源就越多。在大多数运行环境中，相比于经过动态编译和代码优化所获得的性能提升，这些损耗微不足道。
 
-A dynamic compiler translates from one language to another dynamically, meaning that it happens as the code is executed -- during runtime! Dynamic compilation and optimization give runtimes the advantage of being able to adapt to changes in application load. Dynamic compilers are very well suited to Java runtimes, which commonly execute in unpredictable and ever-changing environments. Most JVMs use a dynamic compiler such as a Just-In-Time (JIT) compiler. The catch is that dynamic compilers and code optimization sometimes need extra data structures, thread, and CPU resources. The more advanced the optimization or bytecode-context analyzing, the more resources are consumed by compilation. In most environments the overhead is still very small compared to the significant performance gain of the output code.
-
->JVM varieties and Java platform independence
+>JVM的多样性与Java平台的独立性
+>所有的JVM实现都有一个共同点，即它们都试图将应用程序的字节码转换为本地机器指令。一些JVM在载入应用程序后会解释执行应用程序，同时使用性能计数器来查找“热点”代码。还有一些JVM会调用解释执行的阶段，直接编译运行。资源密集型编译任务对应用程序来说可能会产生较大影响，尤其是那些客户端模式下运行的应用程序，但是资源密集型编译任务可以执行一些比较高级的优化任务。更多相关内容请参见[相关资源](#resource)
 >
->All JVM implementations have one thing in common, which is their attempt to get application bytecode translated into machine instructions. Some JVMs interpret application code on load and use performance counters to focus on "hot" code. Some JVMs skip interpretation and rely on compilation alone. The resource intensiveness of compilation can be a bigger hit (especially for client-side applications) but it also enables more advanced optimizations. See [Resources](#resource) for more information.
->
->If you are a beginner to Java, the intricacies of JVMs will be a lot to wrap your head around. The good news is you don't really need to! The JVM manages code compilation and optimization, so you don't have to worry about machine instructions and the optimal way of writing application code for an underlying platform architecture.
+>如果你是Java初学者，JVM本身错综复杂结构会让你晕头转向的。不过，好消息是你无需精通JVM。JVM自己会做好代码编译和优化的工作，所以你无需关心如何针对目标平台架构来编写应用程序才能编译、优化，从而生成更好的本地机器指令。
 
 
-#From Java bytecode to execution#
+#从字节码到可运行的程序#
 
-Once you have your Java code compiled into bytecode, the next steps are to translate the bytecode instructions to machine code. This can be done by either an interpreter or a compiler.
+当你编写完Java源代码并将之编译为字节码后，下一步就是将字节码指令编译为本地机器指令。这一步会由解释器或编译器完成。
 
 
-##Interpretation##
+##解释执行##
 
 The simplest form of bytecode compilation is called interpretation. An interpreter simply looks up the hardware instructions for every bytecode instruction and sends it off to be executed by the CPU.
 
