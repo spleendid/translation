@@ -54,23 +54,23 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 当你编写完Java源代码并将之编译为字节码后，下一步就是将字节码指令编译为本地机器指令。这一步会由解释器或编译器完成。
 
 
-##解释执行##
+##解释##
 
 字节码编译的最简单形式称为解释。解释器查找每条字节码指令对应的硬件指令，再由CPU执行相应的硬件指令。
 
 你可以将解释器想象为一个字典：每个单词（字节码指令）都有准确的解释（本地机器指令）。由于解释器每次读取一个字节码指令并立即执行，因此它就没有机会对某个指令集合进行优化。由于每次执行字节码时，解释器都需要做相应的解释工作，因此程序运行起来就很慢。解释执行可以准确执行字节码，但是未经优化而输出的指令集难以发挥目标平台处理器的最佳性能。
 
 
-##编译执行##
+##编译##
 
-另一方面，编译执行应用程序时，编译器会将加载运行时会用到的全部代码。因为编译器可以将字节码编译为本地代码，因此它可以获取到完整或部分运行时上下文信息，并依据收集到的信息决定到底应该如何编译字节码。编译器是根据诸如指令的不同执行分支和运行时上下文数据等代码信息来指定决策的。
+另一方面，编译执行应用程序时，*编译器*会将加载运行时会用到的全部代码。因为编译器可以将字节码编译为本地代码，因此它可以获取到完整或部分运行时上下文信息，并依据收集到的信息决定到底应该如何编译字节码。编译器是根据诸如指令的不同执行分支和运行时上下文数据等代码信息来指定决策的。
 
-A *compiler* on the other hand loads the entire code to be executed into the runtime. As it translates bytecode, it has ability to look at the entire or partial runtime context and make decisions about how to actually translate the code. Its decisions are based on analysis of code graphs such as different execution branches of instructions and runtime-context data.
-
-When a bytecode sequence is translated into a machine-code instruction set and optimizations can be done to this instruction set, the replacing instruction set (e.g., the optimized sequence) is stored into a structure called the code cache. The next time that bytecode is executed, the previously optimized code can be immediately located in the code cache and used for execution. In some cases a performance counter might kick in and override the previous optimization, in which case the compiler will run a new optimization sequence. The advantage of a code cache is that the resulting instruction set can be executed at once -- no need for interpretive lookups or compilation! This speeds up execution time, especially for Java applications where the same methods are called multiple times.
+当字节码序列被编译为机器代码指令集合时，就可以对这个指令集合做一些优化操作了，优化后的指令集合会被存储到成为code cache的数据结构中。当下一次执行这部分字节码序列时，就会执行这些经过优化后被存储到code cache的指令集合。在某些情况下，性能计数器会失效，并覆盖掉先前所做的优化，这时，编译器会执行一次新的优化过程。使用code cache的好处是优化后的指令集可以立即执行 —— 无需像解释器一样再经过查找的过程或编译过程！这可以加速程序运行，尤其是像Java应用程序这种同一个方法会被多次调用应用程序。
 
 
-##Optimization##
+##优化##
+
+
 
 Along with dynamic compilation comes the opportunity to insert performance counters. The compiler might, for instance, insert a performance counter to count every time a bytecode block (e.g, corresponding to a specific method) was called. Compilers use data about how "hot" a given bytecode is to determine where in the code optimizations will best impact the running application. Runtime profiling data enables the compiler to make a rich set of code optimization decisions on the fly, further improving code-execution performance. As more refined code-profiling data becomes available it can be used to make additional and better optimization decisions, such as: how to better sequence instructions in the compiled-to language, whether to replace a set of instructions with more efficient sets, or even whether to eliminate redundant operations.
 
