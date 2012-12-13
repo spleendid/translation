@@ -63,7 +63,7 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 ##编译执行##
 
-
+另一方面，编译执行应用程序时，编译器会将加载运行时会用到的全部代码。因为编译器可以将字节码编译为本地代码，因此它可以获取到完整或部分运行时上下文信息，并依据收集到的信息决定到底应该如何编译字节码。编译器是根据诸如指令的不同执行分支和运行时上下文数据等代码信息来指定决策的。
 
 A *compiler* on the other hand loads the entire code to be executed into the runtime. As it translates bytecode, it has ability to look at the entire or partial runtime context and make decisions about how to actually translate the code. Its decisions are based on analysis of code graphs such as different execution branches of instructions and runtime-context data.
 
