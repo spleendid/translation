@@ -70,7 +70,7 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 ##优化##
 
-
+随着动态编译器一起出现的是性能计数器。例如，编译器会插入性能计数器，以统计每个字节码块（对应与某个被调用的方法）的调用次数。在进行相关优化时，编译器会使用收集到的数据来判断某个字节码块有多“热”，这样可以最大程度的降低对当前应用程序的影响。
 
 Along with dynamic compilation comes the opportunity to insert performance counters. The compiler might, for instance, insert a performance counter to count every time a bytecode block (e.g, corresponding to a specific method) was called. Compilers use data about how "hot" a given bytecode is to determine where in the code optimizations will best impact the running application. Runtime profiling data enables the compiler to make a rich set of code optimization decisions on the fly, further improving code-execution performance. As more refined code-profiling data becomes available it can be used to make additional and better optimization decisions, such as: how to better sequence instructions in the compiled-to language, whether to replace a set of instructions with more efficient sets, or even whether to eliminate redundant operations.
 
