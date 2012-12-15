@@ -70,33 +70,31 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 ##优化##
 
-随着动态编译器一起出现的是性能计数器。例如，编译器会插入性能计数器，以统计每个字节码块（对应与某个被调用的方法）的调用次数。在进行相关优化时，编译器会使用收集到的数据来判断某个字节码块有多“热”，这样可以最大程度的降低对当前应用程序的影响。
-
-Along with dynamic compilation comes the opportunity to insert performance counters. The compiler might, for instance, insert a performance counter to count every time a bytecode block (e.g, corresponding to a specific method) was called. Compilers use data about how "hot" a given bytecode is to determine where in the code optimizations will best impact the running application. Runtime profiling data enables the compiler to make a rich set of code optimization decisions on the fly, further improving code-execution performance. As more refined code-profiling data becomes available it can be used to make additional and better optimization decisions, such as: how to better sequence instructions in the compiled-to language, whether to replace a set of instructions with more efficient sets, or even whether to eliminate redundant operations.
+随着动态编译器一起出现的是性能计数器。例如，编译器会插入性能计数器，以统计每个字节码块（对应与某个被调用的方法）的调用次数。在进行相关优化时，编译器会使用收集到的数据来判断某个字节码块有多“热”，这样可以最大程度的降低对当前应用程序的影响。运行时数据监控有助于编译器完成多种代码优化工作，进一步提升代码执行性能。随着收集到的运行时数据越来越多，编译器就可以完成一些额外的、更加复杂的代码优化工作，例如编译出更高质量的目标代码，使用运行效率更高的代码替换原代码，甚至是提出冗余操作等。
 
 
-##Example##
+##示例##
 
-Consider the Java code:
+考虑如下代码：
 
     static int add7( int x ) {
         return x+7;
     }
 
-This could be statically compiled by javac to the bytecode:
+这段代码经过javac编译后会产生如下的字节码：
 
     iload0
     bipush 7
     iadd
     ireturn
 
-When the method is called the bytecode block will be dynamically compiled to machine instructions. When a performance counter (if present for the code block) hits a threshold it might also get optimized. The end result could look like the following machine instruction set for a given execution platform:
+当调用这段代码时，字节码块会被动态的编译为本地机器指令。当性能计数器（如果这段代码应用了性能计数器的话）发现这段代码的运行次数超过了某个阈值后，动态编译器会对这段代码进行优化编译。后带的代码可能会是下面这个样子：
 
     lea rax,[rdx+7]
     ret
 
 
-#Different compilers for different applications#
+#具体问题具体分析#
 
 Different Java applications have different needs. Long-running enterprise server-side applications could allow for more optimizations, while smaller client-side applications may need fast execution with minimal resource consumption. Let's consider three different compiler settings and their respective pros and cons.
 
