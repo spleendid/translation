@@ -96,28 +96,29 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 #具体问题具体分析#
 
-Different Java applications have different needs. Long-running enterprise server-side applications could allow for more optimizations, while smaller client-side applications may need fast execution with minimal resource consumption. Let's consider three different compiler settings and their respective pros and cons.
+不同的Java应用程序需要满足不同的需求。相对来说，企业级服务器端应用程序需要长时间运行，因此可以做更多的优化，而稍小点的客户端应用程序可能要求快速启动运行，占资源少。接下来我们考察三种编译器设置及其各自的优缺点。
 
 
-##Client-side compilers##
+##客户端编译器##
 
-A well-known optimizing compiler is C1, the compiler that is enabled through the -client JVM startup option. As its startup name suggests, C1 is a client-side compiler. It is designed for client-side applications that have fewer resources available and are, in many cases, sensitive to application startup time. C1 use performance counters for code profiling to enable simple, relatively unintrusive optimizations.
+大家熟知的优化编译器是C1，在启动应用程序时，添加JVM启动参数“-client”可以启用C1编译器。正如启动参数所表示的，C1是一个客户端编译器，它专为客户端应用程序而设计，资源消耗更少，并且在大多数情况下，对应用程序的启动时间很敏感。C1编译器使用性能计数器来收集代码的运行时信息，执行一些简单、无侵入的代码优化任务。
 
 
-##Server-side compilers##
+##服务器端编译器##
 
-For long-running applications such as server-side enterprise Java applications, a client-side compiler might not be enough. A server-side compiler like C2 could be used instead. C2 is usually enabled by adding the JVM startup option -server to your startup command-line. Since most server-side programs are expected to run for a long time, enabling C2 means that you will be able to gather more profiling data than you would with a short-running light-weight client application. So you'll be able to apply more advanced optimization techniques and algorithms.
+对于那些需要长时间运行的应用程序，例如服务器端的企业级Java应用程序来说，客户端编译器所实现的功能还略有不足，因此服务器端的编译会使用类似C2这类的编译器。启动应用程序时添加命令行参数“-server”可以启用C2编译器。由于大多数服务器端应用程序都会长时间运行，因此相对于运行时间稍短的轻量级客户端应用程序，在服务器端应用程序中启用C2编译器可以收集到更多的运行时数据，也就可以执行一些更高级的编译技术与算法。
 
->*Tip: Warm up your server-side compiler*
+
+>*提示：给服务器端编译器热身*
 >
->For server-side deployments it may take some time before the compiler has optimized the initial "hot" parts of the code, so server-side deployments often require a "warm up" phase. Before doing any kind of performance measurement on a server-side deployment, make sure that your application has reached the steady state! Allowing the compiler enough time to compile properly will work to your benefit! (See the JavaWorld article "[Watch your HotSpot compiler go][6]" for more about warming up your compiler and the mechanics of profiling.)
+>对于服务器端编译器来说，在应用程序开始运行之后，编译器可能会在一段时间之后才开始优化“热点”代码，所以服务器端编译器通常需要经过一个“热身”阶段。在服务器端编译器执行性能优化任务之前，要确保应用程序的各项准备工作都已就绪。给予编译器足够多的时间来完成编译、优化的工作才能取得更好的效果。（更多关于编译器热身与监控原理的内容请参见JavaWorld的文章"[Watch your HotSpot compiler go][6]"。）
 
-A server compiler accounts for more profiling data than a client-side compiler does, and allows more complex branch analysis, meaning that it will consider which optimization path would be more beneficial. Having more profiling data available yields better application results. Of course, doing more extensive profiling and analysis requires expending more resources on the compiler. A JVM with C2 enabled will use more threads and more CPU cycles, require a a larger code cache, and so on.
+在执行编译任务优化任务时，服务器端编译器要比客户端编译器综合考虑更多的运行时信息，执行更复杂的分支分析，即对哪种优化路径能取得更好的效果作出判断。获取的运行时数据越多，编译优化所产生的效果越好。当然，要完成一些复杂的、高级的性能分析任务，编译器就需要消耗更多的资源。使用了C2编译器的JVM会消耗更多的资源，例如更多的线程，更多的CPU指令周期，以及更大的code cache等。
 
 
-##Tiered compilation##
+##层次编译##
 
-*Tiered compilation* combines client-side and server-side compilation. Azul first made tiered compilation available in its Zing JVM. More recently (as of Java SE 7) it has been adopted by Oracle Java Hotspot JVM. Tiered compilation takes advantage of both client and server compiler advantages in your JVM. The client compiler is most active during application startup and handles optimizations triggered by lower performance-counter thresholds. The client-side compiler also inserts performance counters and prepares instruction sets for more advanced optimizations, which will be addressed at a later stage by the server-side compiler. Tiered compilation is a very resource-efficient way of profiling because the compiler is able to collect data during low-impact compiler activity, which can be used for more advanced optimizations later. This approach also yields more information than you'll get from using interpreted code profile counters alone.
+*层次编译*综合了服务器端编译器和客户端编译器的特点。Azul首先在其Zing JVM中实现了层次编译。最近（就是Java SE 7版本），Oracle Java HotSpot VM也采用了这种设计。在应用程序启动阶段，客户端编译器最为活跃，执行一些由较低的性能计数器阈值出发的性能优化任务。此外，客户端编译器还会插入性能计数器，为一些更复杂的性能优化任务准备指令集，这些任务将在后续的阶段中由服务器端编译器完成。层次编译可以更有效的利用资源，因为编译器在执行一些对应用程序影响较小的编译活动时仍可以继续收集运行时信息，而这些信息可以在将来用于完成更高级的优化任务。使用层次编译可以比解释性的代码性能计数器手机到更多的信息。
 
 The chart schema in Figure 1 depicts the performance differences between pure interpretation, client-side, server-side, and tiered compilation. The X-axis shows execution time (time unit) and the Y-axis performance (ops/time unit).
 
