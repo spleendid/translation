@@ -115,7 +115,7 @@ For long-running applications such as server-side enterprise Java applications, 
 A server compiler accounts for more profiling data than a client-side compiler does, and allows more complex branch analysis, meaning that it will consider which optimization path would be more beneficial. Having more profiling data available yields better application results. Of course, doing more extensive profiling and analysis requires expending more resources on the compiler. A JVM with C2 enabled will use more threads and more CPU cycles, require a a larger code cache, and so on.
 
 
-##Tiered compilation##
+##层次编译##
 
 *Tiered compilation* combines client-side and server-side compilation. Azul first made tiered compilation available in its Zing JVM. More recently (as of Java SE 7) it has been adopted by Oracle Java Hotspot JVM. Tiered compilation takes advantage of both client and server compiler advantages in your JVM. The client compiler is most active during application startup and handles optimizations triggered by lower performance-counter thresholds. The client-side compiler also inserts performance counters and prepares instruction sets for more advanced optimizations, which will be addressed at a later stage by the server-side compiler. Tiered compilation is a very resource-efficient way of profiling because the compiler is able to collect data during low-impact compiler activity, which can be used for more advanced optimizations later. This approach also yields more information than you'll get from using interpreted code profile counters alone.
 
