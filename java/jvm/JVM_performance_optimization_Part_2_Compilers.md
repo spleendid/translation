@@ -129,6 +129,8 @@ Figure 1中展示了纯解释运行、客户端模式运行、服务器端模式
 
 ##编译性能对比##
 
+相比于纯解释运行的的代码，以客户端模式编译运行的代码在性能（指单位时间执行的操作）上可以达到约5到10倍，因此而提升了应用程序的运行性能。
+
 Compared to purely interpreted code, using a client-side compiler leads to approximately 5 to 10 times better execution performance (in ops/s), thus improving application performance. The variation in gain is of course dependent on how efficient the compiler is, what optimizations are enabled or implemented, and (to a lesser extent) how well-designed the application is with regard to the target platform of execution. The latter is really something a Java developer should never have to worry about, though.
 
 As compared to a client-side compiler, a server-side compiler usually increases code performance by a measurable 30 percent to 50 percent. In most cases that performance improvement will balance the additional resource cost.
