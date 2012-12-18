@@ -120,14 +120,14 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 *层次编译*综合了服务器端编译器和客户端编译器的特点。Azul首先在其Zing JVM中实现了层次编译。最近（就是Java SE 7版本），Oracle Java HotSpot VM也采用了这种设计。在应用程序启动阶段，客户端编译器最为活跃，执行一些由较低的性能计数器阈值出发的性能优化任务。此外，客户端编译器还会插入性能计数器，为一些更复杂的性能优化任务准备指令集，这些任务将在后续的阶段中由服务器端编译器完成。层次编译可以更有效的利用资源，因为编译器在执行一些对应用程序影响较小的编译活动时仍可以继续收集运行时信息，而这些信息可以在将来用于完成更高级的优化任务。使用层次编译可以比解释性的代码性能计数器手机到更多的信息。
 
-The chart schema in Figure 1 depicts the performance differences between pure interpretation, client-side, server-side, and tiered compilation. The X-axis shows execution time (time unit) and the Y-axis performance (ops/time unit).
+Figure 1中展示了纯解释运行、客户端模式运行、服务器端模式运行和层次编译模式运行下性能之间的区别。X轴表示运行时间（单位时间）Y轴表示性能（每单位时间内的操作数）。
 
 ![Figure 1. Performance differences between compilers](images/jvmseries2-fig1.png?raw=true "Figure 1. Performance differences between compilers")
 
 *Figure 1. Performance differences between compilers*
 
 
-##Compiler performance comparisons##
+##编译性能对比##
 
 Compared to purely interpreted code, using a client-side compiler leads to approximately 5 to 10 times better execution performance (in ops/s), thus improving application performance. The variation in gain is of course dependent on how efficient the compiler is, what optimizations are enabled or implemented, and (to a lesser extent) how well-designed the application is with regard to the target platform of execution. The latter is really something a Java developer should never have to worry about, though.
 
