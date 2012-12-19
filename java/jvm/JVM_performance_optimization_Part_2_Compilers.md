@@ -94,7 +94,7 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
     ret
 
 
-#具体问题具体分析#
+#各擅胜场#
 
 不同的Java应用程序需要满足不同的需求。相对来说，企业级服务器端应用程序需要长时间运行，因此可以做更多的优化，而稍小点的客户端应用程序可能要求快速启动运行，占资源少。接下来我们考察三种编译器设置及其各自的优缺点。
 
@@ -129,40 +129,38 @@ Figure 1中展示了纯解释运行、客户端模式运行、服务器端模式
 
 ##编译性能对比##
 
-相比于纯解释运行的的代码，以客户端模式编译运行的代码在性能（指单位时间执行的操作）上可以达到约5到10倍，因此而提升了应用程序的运行性能。
+相比于纯解释运行的的代码，以客户端模式编译运行的代码在性能（指单位时间执行的操作）上可以达到约5到10倍，因此而提升了应用程序的运行性能。其间的区别主要在于编译器的效率、编译器所作的优化，以及应用程序在设计实现时针对目标平台做了何种程度的优化。实际上，最后一条不在Java程序员的考虑之列。
 
-Compared to purely interpreted code, using a client-side compiler leads to approximately 5 to 10 times better execution performance (in ops/s), thus improving application performance. The variation in gain is of course dependent on how efficient the compiler is, what optimizations are enabled or implemented, and (to a lesser extent) how well-designed the application is with regard to the target platform of execution. The latter is really something a Java developer should never have to worry about, though.
+相比于客户端编译器，使用服务器端编译器通常会有30%到50%的性能提升。在大多数情况下，这种程度的性能提升足以弥补使用服务器端编译所带来的额外资源消耗。
 
-As compared to a client-side compiler, a server-side compiler usually increases code performance by a measurable 30 percent to 50 percent. In most cases that performance improvement will balance the additional resource cost.
-
-Tiered compilation combines the best features of both compilers. Client-side compilation yields quick startup time and speedy optimization, while server-side compilation delivers more advanced optimizations later in the execution cycle.
+层次编译综合了服务器端编译器和客户端编译器的优点，使用客户端编译模式实现快速启动和快速优化，使用服务器端编译模式在后续的执行周期中完成高级优化的编译任务。
 
 
-#Some common compiler optimizations#
+#常用编译优化措施#
 
-I've so far discussed the value of optimizing code and how and when common JVM compilers optimize code. I'll conclude with some of the actual optimizations available to compilers. JVM optimization actually happens at the bytecode level (or on lower representative language levels), but I'll demonstrate the optimizations using the Java language. I couldn't possibly cover all of the JVM optimizations in this section; rather, I mean to inspire you to explore on your own and learn about the hundreds of advanced optimizations and innovations in compiler technology (see [Resources][7]).
+到目前为止，已经介绍了优化代码的价值，以及常用JVM编译器是如何以及何时编译代码的。接下来，将用一些实际的例子做个总结。JVM所作的性能优化通常在字节码这一层级（或者是更底层的语言表示），但这里我将使用Java编程语言对优化措施进行介绍。在这一节中，我无法涵盖JVM中所作的所有性能优化，相反，我希望可以激发你的兴趣，使你主动挖掘并学习编译器技术中所包含了数百种高级优化技术（参见[相关资源][7]）。
 
 
-##Dead code elimination##
+##死代码剔除##
 
-*Dead code elimination* is what it sounds like: the elimination of code that has never been called -- i.e., "dead" code. If a compiler discovers during runtime that some instructions are unnecessary, it will simply eliminate them from the execution instruction set. For example, in Listing 1 a certain value assignment for a variable is never used and can be fully ignored at execution time. On a bytecode level this could correspond to never needing to execute the load of the value into a register. Not having to do the load means less CPU time, and hence a quicker code execution, and therefore the application -- especially if the code is hot and called several times per second.
+*死代码剔除*指的是，将用于无法被调用的代码，即“死代码”，从源代码中剔除。如果编译器在运行时发现某些指令是不必要的，它会简单的将其从可执行指令集中剔除。例如，在Listing 1中，变量被赋予了确定值，却从未被使用，因此可以在执行时将其完全忽略掉。在字节码这一层级，也就不会有将数值载入到寄存器的操作。没有载入操作意味着可以更少的CPU时间，更好的运行性能，尤其是当这段代码是“热点”代码的时候。
 
-Listing 1 shows Java code exemplifying a variable that is never used, an unnecessary operation.
+Listing 1中展示了示例代码，其中被赋予了固定值的代码从未被使用，属于无用不必要的操作。
 
 _Listing 1. Dead code_
 
     int timeToScaleMyApp(boolean endlessOfResources) {
-    int reArchitect = 24;
-    int patchByClustering = 15;
-    int useZing = 2;
-    
-    if(endlessOfResources)
-        return reArchitect + useZing;
-    else
-        return useZing;
+        int reArchitect = 24;
+        int patchByClustering = 15;
+        int useZing = 2;
+        
+        if(endlessOfResources)
+            return reArchitect + useZing;
+        else
+            return useZing;
     }
 
-On a bytecode level, if a value is loaded but never used, the compiler can detect this and eliminate the dead code, as shown in Listing 2. Never executing the load saves CPU time and thus improves the program's execution speed.
+在字节码这一层级，如果变量被载入但从未使用，编译器会检测到并剔除这个死代码，如Listing 2所示。剔除死代码可以节省CPU时间，从而提升应用程序的运行速度。
 
 _Listing 2. The same code following optimization_
 
@@ -177,7 +175,7 @@ _Listing 2. The same code following optimization_
         return useZing;
     }
 
-Redundancy elimination is a similar optimization that removes duplicate instructions to improve application performance.
+冗余剔除是一种类似的优化手段，通过剔除掉重复的指令来提升应用程序性能。
 
 
 ##Inlining##
