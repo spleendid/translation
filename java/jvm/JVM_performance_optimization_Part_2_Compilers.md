@@ -178,9 +178,9 @@ _Listing 2. The same code following optimization_
 冗余剔除是一种类似的优化手段，通过剔除掉重复的指令来提升应用程序性能。
 
 
-##Inlining##
+##内联##
 
-Many optimizations try to eliminate machine-level jump instructions (e.g., JMP for x86 architectures). A jump instruction changes the instruction pointer register and thereby transfers the execution flow. This is an expensive operation relative to other ASSEMBLY instructions, which is why it is a common target to reduce or eliminate. A very useful and well-known optimization that targets this is called inlining. Since jumping is expensive, it can be helpful to inline many frequent calls to small methods, with different entry addresses, into the calling function. The Java code in Listings 3 through 5 exemplifies the benefits of inlining.
+许多优化手段都试图消除机器级跳转指令（例如，x86架构的JMP指令）。跳转指令会修改指令指针寄存器，因此而改变了执行流程。相比于其他汇编指令，跳转指令是一个代价高昂的指令，这也是为什么大多数优化手段会试图减少甚至是消除跳转指令。内联是一种家喻户晓而且好评如潮的优化手段，这是因为跳转指令代价高昂，而内联技术可以将经常调用的、具有不容入口地址的小方法整合到调用方法中。Listing 3到Listing 5中的Java代码展示了使用内联的用法。
 
 _Listing 3. Caller method_
 
@@ -209,9 +209,9 @@ _Listing 5. Inlined method_
         return temp; 
     }
 
-In Listings 3 through 5 the calling method makes three calls to a small method, which we assume for this example's sake is more beneficial to inline than to jump to three times.
+在Listing 3到Listing 5的代码中，展示了将调用3次小方法进行内联的示例，这里我们认为使用内联比跳转有更多的优势。
 
-It might not make much difference to inline a method that is called rarely, but inlining a so-called "hot" method that is frequently called could mean a huge difference in performance. Inlining also frequently makes way for further optimizations, as shown in Listing 6.
+如果被内联的方法本身就很少被调用的话，那么使用内联也没什么意义，但是对频繁调用的“热点”方法进行内联在性能上会有很大的提升。此外，经过内联处理后，就可以对内联后的代码进行进一步的优化，正如Listing 6中所展示的那样。
 
 _Listing 6. After inlining, more optimizations can be applied_
 
@@ -222,19 +222,19 @@ _Listing 6. After inlining, more optimizations can be applied_
     }
 
 
-##Loop optimization##
+##循环优化##
 
-*Loop optimization* plays a big role when it comes to reducing the overhead that comes with executing loops. Overhead in this case means expensive jumps, number of checks of the condition, non-optimal instruction pipeline (i.e., an order of instructions that causes no-operations or extra cycles in the CPU). There are many kinds of loop optimizations, amounting to a vast set of optimizations. Notables include:
+当涉及到需要减少执行循环时的性能损耗时，循环优化起着举足轻重的作用。执行循环时的性能损耗包括代价高昂的跳转操作，大量的条件检查，和未经优化的指令流水线（即引起CPU空操作或额外周期的指令序列）等。循环优化可以分为很多种，在各种优化手段中占有重要比重。其中值得注意的包括以下几种：
 
-* Combining loops: When two nearby loops are iterated the same amount of times, the compiler can try to combine the bodies of the loops, to be executed at the same time (in parallel) in the case where nothing in the bodies reference each other, i.e., they are fully independent of each other.
-* Inversion loops: Basically you replace a regular while loop with a do-while loop. And the do-while loop is set within an if clause. This replacement leads to two less jumps. However, it adds to the condition check and hence increases the code size. This optimization is an excellent example of how using slightly more resources leads to a more efficient code - a cost-gain balance the compiler has to evaluate and decide on dynamically during runtime.
-* Tiling loops: Reorganizes the loop so that it iterates over blocks of data that are sized to fit in the cache.
-* Unrolling loops: Reduces the number of times the loop condition has to be evaluated and also the number of jumps. You can think of this as "inlining" several iterations of the body to be executed without crossing the loop condition. Unrolling loops comes with risk, as it might decrease performance by impairing the pipeline and causing multiple redundant instruction fetches. Again, this is a judgment call by the compiler to make at runtime, i.e., if the gain is enough, the cost might be worth it.
+* 合并循环：当两个相邻循环的迭代次数相同时，编译器会尝试将两个循环体进行合并。当两个循环体中没有相互引用的情况，即各自独立时，可以同时执行（并行执行）。
+* 反转循环：基本上将就是用do-while循环体换掉常规的while循环，这个do-while循环嵌套在if语句块中。这个替换操作可以节省两次跳转操作，但是，会增加一个条件检查的操作，因此增加的代码量。这种优化方式完美的展示了以少量增加代码量为代价换取较大性能的提升 —— 编译器需要在运行时需要权衡这种得与失，并制定编译策略。
+* 分块循环：重新组织循环体，以便迭代数据块时，便于缓存的应用。
+* 展开循环：减少判断循环条件和跳转的次数。你可以将之理解为将一些迭代的循环体“内联”到一起，而无需跨越循环条件。展开循环是有风险的，它有可能会降低应用程序的运行性能，因为它会影响流水线的运行，导致产生了冗余指令。再强调一遍，展开循环是编译器在运行时根据各种信息来决定是否使用的优化手段，如果有足够的收益的话，那么即使有些性能损耗也是值得的。
 
-This has been an overview of what a compiler does on a bytecode level (and below) to improve an application's execution performance on a target platform. The optimizations discussed are common and popular, but only a brief sampling of the available options. These have been very simple and broad explanations, which hopefully serve to pique your interest for more in-depth exploration. See Resources for further reading.
+至此，已经简要介绍了编译器对字节码层级（以及更底层）进行优化，以提升应用程序在目标平台的执行性能的几种方式。这里介绍的几种优化手段是比较常用的几种，只是众多优化技术中的几种。在介绍优化方法时配以简单示例和相关解释，希望可以洗发你进行深度探索的兴趣。更多相关内容请参见[相关资源][7]。
 
 
-#In conclusion: Reflection points and highlights#
+#总结：回顾#
 
 Use different compilers for different needs.
 
