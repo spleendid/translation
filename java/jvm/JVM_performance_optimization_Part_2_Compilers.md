@@ -236,35 +236,33 @@ _Listing 6. After inlining, more optimizations can be applied_
 
 #总结：回顾#
 
-Use different compilers for different needs.
+为满足不同需要而使用不同的编译器。
 
-* Interpretation is the simplest form of bytecode translation to machine instructions, and works based on an instruction lookup table.
-* Compilers allow for optimization based on performance counters, but will require some additional resources (code cache, optimization threads, etc.)
-* Client-side compilers improve the performance of execution code by an order of magnitude (5 to 10 times better) when compared to interpreted code.
-* Server-side compilers improve application performance by 30 percent to 50 percent over client-side compilers, but utilize more resources.
-* Tiered compilation provides the best of two worlds. Enable client compilation to get your code performing well quickly, and server compilation over time, to make frequently called code execute even better.
+* 解释是将字节码转换为本地机器指令的最简单方式，其工作方式是基于对本地机器指令表的查找。
+* 编译器可以基于性能计数器进行性能优化，但是需要消耗更多的资源（如code cache，优化线程等）。
+* 相比于纯解释执行代码，客户端编译器可以将应用程序的执行性能提升一个数量级（约5到10倍）。
+* 相比于客户端编译器，服务器端编译器可以将应用程序的执行性能提升30%到50%，但会消耗更多的资源。
+* 层次编译综合了客户端编译器和服务器端编译器的优点，既可以像客户端编译器那样快速启动，又可以像服务器端编译器那样，在长时间收集运行时信息的基础上，优化应用程序的性能。
 
-There are many possible code optimizations. An important task for the compiler is to analyze all possibilities and weigh the cost of using an optimization against the execution speed benefit of the output machine code.
-
-
-##About the author##
-
-Eva Andreasson has been involved with Java virtual machine technologies, SOA, cloud computing, and other enterprise middleware solutions for 10 years. She joined the startup Appeal Virtual Solutions (later acquired by BEA Systems) in 2001 as a developer of the JRockit JVM. Eva has been awarded two patents for garbage collection heuristics and algorithms. She also pioneered Deterministic Garbage Collection which later became productized through JRockit Real Time. Eva has worked closely with Sun and Intel on technical partnerships, as well as various integration projects of JRockit Product Group, WebLogic, and Coherence (post Oracle acquisition in 2008). In 2009 Eva joined Azul Systems as product manager for the new Zing Java Platform. Recently she switched gears and joined the team at Cloudera as senior product manager for Cloudera's Hadoop distribution, where she is engaged in the exciting future and innovation path of highly scalable, distributed data processing frameworks.
+目前，已经出现了很多代码优化的手段。对编译器来说，一个主要的任务就是分析所有的可能性，权衡使用某种优化手段的利弊，在此基础上编译代码，优化应用程序的性能。
 
 
+##关于作者##
+
+Eva Andearsson对JVM计数、SOA、云计算和其他企业级中间件解决方案有着10多年的从业经验。在2001年，她以JRockit JVM开发者的身份加盟了创业公司Appeal Virtual Solutions（即BEA公司的前身）。在垃圾回收领域的研究和算法方面，EVA获得了两项专利。此外她还是提出了确定性垃圾回收（Deterministic Garbage Collection），后来形成了JRockit实时系统（JRockit Real Time）。在技术上，Eva与SUn公司和Intel公司合作密切，涉及到很多将JRockit产品线、WebLogic和Coherence整合的项目。2009年，Eva加盟了Azul System公，担任产品经理。负责新的Zing Java平台的开发工作。最近，她改换门庭，以高级产品经理的身份加盟Cloudera公司，负责管理Cloudera公司Hadoop分布式系统，致力于高扩展性、分布式数据处理框架的开发。
 
 
+#相关资源#
 
-#Resource#
-"JVM performance optimization, Part 1: A JVM technology primer" (Eva Andreasson, JavaWorld, August 2012) launches the JVM performance optimization series with an overview of how a classic Java virtual machine works, including Java's write-once, run-anywhere engine, garbage collection basics, and some common GC algorithms.
-See "Watch your HotSpot compiler go" (Vladimir Roubtsov, JavaWorld.com, April 2003) for more about the mechanics of hotspot optimization and why it pays to warm up your compiler.
-If you want to learn more about bytecode and the JVM, see "Bytecode basics" (Bill Venners, JavaWorld, 1996), which takes an initial look at the bytecode instruction set of the Java virtual machine, including primitive types operated upon by bytecodes, bytecodes that convert between types, and bytecodes that operate on the stack.
-The Java compiler javac is fully discussed in the formal Java platform documentation.
-Get more of the basics of JVM (JIT) compilers, see the IBM Research Java JIT compiler page.
-Also see Oracle JRockit's "Understanding Just-In-Time Compilation and Optimization" (Oracle? JRockit Introduction Release R28).
-Dr. Cliff Click gives a complete tutorial on tiered compilation in his Azul Systems blog (July 2010).
-Learn more about using performance counters for JVM performance optimization: "Using Platform-Specific Performance Counters for Dynamic Compilation" (Florian Schneider and Thomas R. Gross; Proceedings of the 18th international conference on Languages and Compilers for Parallel Computing, published by ACM Digital Library).
-Oracle JRockit: The Definitive Guide (Marcus Hirt, Marcus Lagergren; Packt Publishing, 2010): A complete guide to the JRockit JVM.
+* ["JVM性能优化， Part 1 ——JVM简介"][2](作者Eva Andreasson, 于2012年8约发表于JavaWorld)是该系列的第一篇，对经典JVM的工作原理做了简单介绍，包括Java“一次编写，到处运行”的优势，垃圾回收基础和一些常用的垃圾回收算法。
+* 更多有关HotSpot优化原理以及JVM热身的内容请参见Vladimir Roubtsov与2003年4约发表于JavaWorld.com的文章["Watch your HotSpot compiler go"][6]
+* 如果你想对JVM和字节码有更深入的了解，请参见Bill Venners在1996年发表于JavaWorld的文章["Bytecode basics"][4]。文章对JVM中的字节码指令集做了介绍，内容包括原生类型操作、类型转换以及栈上操作等。
+* 在Java平台的官方文档中有对[Java编译器][8]javac的详细描述。
+* 更多有关JVM中JIT编译器的内容，请参见IBM Research中有关[Java JIT Compiler][9]的内容。
+* 或者参见Oracle JRockit文档中["Understanding Just-In-Time Compilation and Optimization"][10]的相关内容.
+* Cliff Click博士在其博客上有关于[层次编译][11]的完整教程。
+* 更多有关使用性能计数器完成JVM性能优化的文章：["Using Platform-Specific Performance Counters for Dynamic Compilation"][12] (作者Florian Schneider与Thomas R. Gross;由ACM Digital Lirary发表在第18届Languages and Compilers for Parallel Computing会议上)
+* Oracle JRockit: The Definitive Guide (Marcus Hirt, Marcus Lagergren; Packt Publishing, 2010): Oracle JRockit权威指南
 
 
 
@@ -275,3 +273,8 @@ Oracle JRockit: The Definitive Guide (Marcus Hirt, Marcus Lagergren; Packt Publi
 [5]:  http://www.javaworld.com/javaworld/jw-08-2012/120821-jvm-performance-optimization-overview.html  "静态与动态编译器"
 [6]:  http://www.javaworld.com/javaqa/2003-04/01-qa-0411-hotspot.html  "Watch your HotSpot compiler go"
 [7]:  https://github.com/caoxudong/translation/blob/master/java/jvm/JVM_performance_optimization_Part_2_Compilers.md#resource "相关资源"
+[8]:  http://docs.oracle.com/javase/6/docs/technotes/guides/javac/index.html  "Java Compiler"
+[9]:  http://researchweb.watson.ibm.com/trl/projects/jit/index_e.htm  "Java JIT Compiler"
+[10]: http://docs.oracle.com/cd/E15289_01/doc.40/e15058/underst_jit.htm  "Understanding Just-In-Time Compilation and Optimization"
+[11]: http://www.azulsystems.com/blog/cliff/2010-07-16-tiered-compilation "层次编译"
+[12]: http://dl.acm.org/citation.cfm?id=2081919  "Using Platform-Specific Performance Counters for Dynamic Compilation"
