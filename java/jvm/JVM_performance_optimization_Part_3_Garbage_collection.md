@@ -14,6 +14,25 @@ Eventually, the Java heap will be full, which means that an allocating thread is
 
 A garbage collector should never reclaim an actively referenced object; to do so would break the [Java virtual machine specification][1]. A garbage collector is also not required to immediately collect dead objects. Dead objects are eventually collected during subsequent garbage collection cycles. While there are many ways to implement garbage collection, these two assumptions are true for all varieties. The real challenge of garbage collection is to identify everything that is live (still referenced) and reclaim any unreferenced memory, but do so without impacting running applications any more than necessary. A garbage collector thus has two mandates:
 
+    1. To quickly free unreferenced memory in order to satisfy an application's allocation rate so that it doesn't run out of memory.
+    2. To reclaim memory while minimally impacting the performance (e.g., latency and throughput) of a running application.
+    
+
+#Two kinds of garbage collection#
+
+In the [first article][2] in this series I touched on the two main approaches to garbage collection, which are reference counting and tracing collectors. This time I'll drill down further into each approach then introduce some of the algorithms used to implement tracing collectors in production environments.
+
+>Read the JVM performance optimization series
+>
+>JVM performance optimization, Part 1: [Overview][2]
+>JVM performance optimization, Part 2: [Compilers][3]
+
+
+##Reference counting collectors##
+
+*Reference counting collectors* keep track of how many references are pointing to each Java object. Once the count for an object becomes zero, the memory can be immediately reclaimed. This immediate access to reclaimed memory is the major advantage of the reference-counting approach to garbage collection. There is very little overhead when it comes to holding on to un-referenced memory. Keeping all reference counts up to date can be quite costly, however.
+
+
 
 
 
