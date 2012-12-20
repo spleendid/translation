@@ -1,3 +1,5 @@
+原文地址： [http://www.javaworld.com/javaworld/jw-10-2012/121010-jvm-performance-optimization-garbage-collection.html?page=1][15]
+
 The Java platform's garbage collection mechanism greatly increases developer productivity, but a poorly implemented garbage collector can over-consume application resources. In this third article in the JVM performance optimization series, Eva Andreasson offers Java beginners an overview of the Java platform's memory model and GC mechanism. She then explains why fragmentation (and not GC) is the major "gotcha!" of Java application performance, and why generational garbage collection and compaction are currently the leading (though not most innovative) approaches to managing heap fragmentation in Java applications.
 
 
@@ -249,3 +251,4 @@ JVM tuning and GC algorithms:
 [12]: http://www.infoq.com/articles/azul_gc_in_detail  "The Azul Garbage Collector"
 [13]: https://github.com/caoxudong/translation/blob/master/java/jvm/JVM_performance_optimization_Part_3_Garbage_collection.md#resources  "Resources"
 [14]: http://www.spec.org/jbb2005/  "SPECjbb"
+[15]: http://www.javaworld.com/javaworld/jw-10-2012/121010-jvm-performance-optimization-garbage-collection.html?page=1  "http://www.javaworld.com/javaworld/jw-10-2012/121010-jvm-performance-optimization-garbage-collection.html?page=1"
