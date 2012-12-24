@@ -24,26 +24,41 @@ When you specify the startup option -Xmx on the command line of your Java applic
 
 Eventually, the Java heap will be full, which means that an allocating thread is unable to find a large-enough consecutive section of free memory for the object it wants to allocate. At that point, the JVM determines that a garbage collection needs to happen and it notifies the garbage collector. A garbage collection can also be triggered when a Java program calls System.gc(). Using System.gc() does not guarantee a garbage collection. Before any garbage collection can start, a GC mechanism will first determine whether it is safe to start it. It is safe to start a garbage collection when all of the application's active threads are at a safe point to allow for it, e.g. simply explained it would be bad to start garbage collecting in the middle of an ongoing object allocation, or in the middle of executing a sequence of optimized CPU instructions (see my previous article on compilers), as you might lose context and thereby mess up end results.
 
-
-
+最后，Java堆会被填满，这就是说想要申请内存的线程无法获得一块足够大的连续空闲空间来存放新创建的对象。此时，JVM判断需要启动垃圾回收器来回收内存了。当Java程序调用System.gc()方法时，也有可能会触发垃圾回收器以执行垃圾回收的工作。使用System.gc()方法并不能保证垃圾回收工作肯定会被执行。在执行垃圾回收前，垃圾回收机制首先会检查当前是否是一个“恰当的时机”，而“恰当的时机”指所有的应用程序活动线程都处于安全点（safe point），以便启动垃圾回收。简单举例，为对象分配内存时，或正在优化CPU指令（参见本系列的[前一篇文章][3]）时，就不是“恰当的时机”，因为你可能会丢失上下文信息，从而得到混乱的结果。
 
 A garbage collector should never reclaim an actively referenced object; to do so would break the [Java virtual machine specification][1]. A garbage collector is also not required to immediately collect dead objects. Dead objects are eventually collected during subsequent garbage collection cycles. While there are many ways to implement garbage collection, these two assumptions are true for all varieties. The real challenge of garbage collection is to identify everything that is live (still referenced) and reclaim any unreferenced memory, but do so without impacting running applications any more than necessary. A garbage collector thus has two mandates:
 
+垃圾回收不应该回收当前有活动引用指向的对象所占用的内存；因为这样做将违反[JVM规范][1]。在JVM规范中，并没有强制要求垃圾回收器立即回收已死对象（dead object）。已死对象最终会在后续的垃圾回收周期中被释放掉。目前，已经有多种垃圾回收的实现，它们都包含两个沟通的假设。对垃圾回收来说，真正的挑战在于标识出所有活动对象（即仍有引用指向的对象），回收所有不可达对象所占用的内存，并尽可能不对正在运行的应用程序产生影响。因此，垃圾回收器运行的两个目标：
+
 1. To quickly free unreferenced memory in order to satisfy an application's allocation rate so that it doesn't run out of memory.
 2. To reclaim memory while minimally impacting the performance (e.g., latency and throughput) of a running application.
+
+1. 快速释放不可达对象所占用的内存，防止应用程序出现OOM错误。
+2. 回收内存时，对应用程序的性能（指延迟和吞吐量）的影响要紧性能小。
     
 
 #Two kinds of garbage collection#
 
+#两类垃圾回收#
+
 In the [first article][2] in this series I touched on the two main approaches to garbage collection, which are reference counting and tracing collectors. This time I'll drill down further into each approach then introduce some of the algorithms used to implement tracing collectors in production environments.
+
+在本系列的[第一篇文章][2]中，我提到了2种主要的垃圾回收方式，引用计数（reference counting）和引用追踪（tracing collector。译者注，在第一篇中，给出的名字是“reference tracing”，这里仍沿用之前的名字）。这里，我将深入这两种垃圾回收方式，并介绍用于生产环境的实现了引用追踪的垃圾回收方式的相关算法。
 
 >Read the JVM performance optimization series
 >
 >JVM performance optimization, Part 1: [Overview][2]
 >JVM performance optimization, Part 2: [Compilers][3]
 
+>相关阅读：JVM性能优化系列
+>
+>JVM性能优化，第一部分: [概述][2]
+>JVM性能优化，第二部分: [编译器][3]
+
 
 ##Reference counting collectors##
+
+##引用计数垃圾回收器##
 
 *Reference counting collectors* keep track of how many references are pointing to each Java object. Once the count for an object becomes zero, the memory can be immediately reclaimed. This immediate access to reclaimed memory is the major advantage of the reference-counting approach to garbage collection. There is very little overhead when it comes to holding on to un-referenced memory. Keeping all reference counts up to date can be quite costly, however.
 
