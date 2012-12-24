@@ -1,18 +1,31 @@
 原文地址： [http://www.javaworld.com/javaworld/jw-10-2012/121010-jvm-performance-optimization-garbage-collection.html?page=1][15]
 
-The Java platform's garbage collection mechanism greatly increases developer productivity, but a poorly implemented garbage collector can over-consume application resources. In this third article in the JVM performance optimization series, Eva Andreasson offers Java beginners an overview of the Java platform's memory model and GC mechanism. She then explains why fragmentation (and not GC) is the major "gotcha!" of Java application performance, and why generational garbage collection and compaction are currently the leading (though not most innovative) approaches to managing heap fragmentation in Java applications.
+_The Java platform's garbage collection mechanism greatly increases developer productivity, but a poorly implemented garbage collector can over-consume application resources. In this third article in the JVM performance optimization series, Eva Andreasson offers Java beginners an overview of the Java platform's memory model and GC mechanism. She then explains why fragmentation (and not GC) is the major "gotcha!" of Java application performance, and why generational garbage collection and compaction are currently the leading (though not most innovative) approaches to managing heap fragmentation in Java applications._
+
+_Java平台的垃圾回收机制大大提高的开发人员的生产力，但实现糟糕的垃圾回收器却会大大消耗应用程序的资源。本文作为JVM性能优化系列的第3篇，Eva Andeasson将为Java初学者介绍Java平台的内存模型和GC机制。她将解释为什么碎片化（不是GC）是Java应用程序出现性能问题的主要原因，以及为什么当前主要通过分代垃圾回收和压缩，而不是其他最具创意的方法，来解决Java应用程序中碎片化的问题。_
 
 
 *Garbage collection (GC)* is the process that aims to free up occupied memory that is no longer referenced by any reachable Java object, and is an essential part of the Java virtual machine's (JVM's) dynamic memory management system. In a typical garbage collection cycle all objects that are still referenced, and thus reachable, are kept. The space occupied by previously referenced objects is freed and reclaimed to enable new object allocation.
 
+*垃圾回收（GC）*是旨在释放不可达Java对象所占用的内存的过程，是Java virtual machine（JVM）中动态内存管理系统的核心组成部分。在一个典型的垃圾回收周期中，所有仍被引用的对象，即可达对象，会被保留。没有被引用的Java对象所占用的内存会被释放并回收，以便分配给新创建的对象。
+
 In order to understand garbage collection and the various GC approaches and algorithms, you must first know a few things about the Java platform's memory model.
+
+为了更好的理解垃圾回收与各种不同的GC算法，你首先需要了解一些关于Java平台内存模型的内容。
 
 
 #Garbage collection and the Java platform memory model#
 
+#垃圾回收与Java平台内存模型
+
 When you specify the startup option -Xmx on the command line of your Java application (for instance: java -Xmx:2g MyApp) memory is assigned to a Java process. This memory is referred to as the *Java heap* (or just *heap*). This is the dedicated memory address space where all objects created by your Java program (or sometimes the JVM) will be allocated. As your Java program keeps running and allocating new objects, the Java heap (meaning that address space) will fill up.
 
+当你在启动Java应用程序时指定了启动参数_-Xmx_（例如，java -Xmx2g MyApp），则相应大小的内存会被分配给Java进程。这块内存即所谓的*Java堆*（或简称为*堆*）。这块专用的内存地址空间用于存储Java应用程序（有时是JVM）所创建的对象。随着Java应用程序的运行，会不断的创建新对象并为之分配内存，Java堆（即地址空间）会逐渐被填满。
+
 Eventually, the Java heap will be full, which means that an allocating thread is unable to find a large-enough consecutive section of free memory for the object it wants to allocate. At that point, the JVM determines that a garbage collection needs to happen and it notifies the garbage collector. A garbage collection can also be triggered when a Java program calls System.gc(). Using System.gc() does not guarantee a garbage collection. Before any garbage collection can start, a GC mechanism will first determine whether it is safe to start it. It is safe to start a garbage collection when all of the application's active threads are at a safe point to allow for it, e.g. simply explained it would be bad to start garbage collecting in the middle of an ongoing object allocation, or in the middle of executing a sequence of optimized CPU instructions (see my previous article on compilers), as you might lose context and thereby mess up end results.
+
+
+
 
 A garbage collector should never reclaim an actively referenced object; to do so would break the [Java virtual machine specification][1]. A garbage collector is also not required to immediately collect dead objects. Dead objects are eventually collected during subsequent garbage collection cycles. While there are many ways to implement garbage collection, these two assumptions are true for all varieties. The real challenge of garbage collection is to identify everything that is live (still referenced) and reclaim any unreferenced memory, but do so without impacting running applications any more than necessary. A garbage collector thus has two mandates:
 
