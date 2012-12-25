@@ -62,7 +62,11 @@ In the [first article][2] in this series I touched on the two main approaches to
 
 *Reference counting collectors* keep track of how many references are pointing to each Java object. Once the count for an object becomes zero, the memory can be immediately reclaimed. This immediate access to reclaimed memory is the major advantage of the reference-counting approach to garbage collection. There is very little overhead when it comes to holding on to un-referenced memory. Keeping all reference counts up to date can be quite costly, however.
 
+*引用计数垃圾回收器*会对指向每个Java对象的引用数进行跟踪。一旦发现指向某个对象的引用数为0，则立即回收该对象所占用的内存。引用计数垃圾回收的主要优点就在于可以立即访问被回收的内存。垃圾回收器维护未被引用的内存并不需要消耗很大的资源，但是保持并不断更新引用计数却代价不菲。
+
 The main difficulty with reference counting collectors is keeping the reference counts accurate. Another well-known challenge is the complexity associated with handling circular structures. If two objects reference each other and no live object refers to them, their memory will never be released. Both objects will forever remain with a non-zero count. Reclaiming memory associated with circular structures requires major analysis, which brings costly overhead to the algorithm, and hence to the application.
+
+使用引用计数方式执行垃圾回收的主要困难在于保持引用计数的准确性，而另一个众所周知的问题在于解决循环引用结构所带来的麻烦。如果两个对象互相引用，并且没有其他存活东西引用它们，那么这两个对象所占用的内存将永远不会被释放，两个对象都会因引用计数不为0而永远存活下去。要解决循环引用带来的问题需要，而这会使算法复杂度增加，从而影响应用程序的运行性能。
 
 
 ##Tracing collectors##
