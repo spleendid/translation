@@ -71,7 +71,11 @@ The main difficulty with reference counting collectors is keeping the reference 
 
 ##Tracing collectors##
 
+##引用跟踪垃圾回收##
+
 *Tracing collectors* are based on the assumption that all live objects can be found by iteratively tracing all references and subsequent references from an initial set of known to be live objects. The initial set of live objects (called root objects or just roots for short) are located by analyzing the registers, global fields, and stack frames at the moment when a garbage collection is triggered. After an initial live set has been identified, the tracing collector follows references from these objects and queues them up to be marked as live and subsequently have their references traced. Marking all found referenced objects live means that the known live set increases over time. This process continues until all referenced (and hence all live) objects are found and marked. Once the tracing collector has found all live objects, it will reclaim the remaining memory.
+
+*引用跟踪垃圾回收器*基于这样一种假设，所有存活对象都可以通过迭代地跟踪从已知存活对象集中对象发出的引用及引用的引用来找到。可以通过对寄存器、全局域、以及触发垃圾回收时栈帧的分析来确定初始存活对象的集合（称为“根对象”，或简称为“根”）。在确定了初始存活对象集后，引用跟踪垃圾回收器会跟踪从这些对象中发出的引用，并找到的对象标记为“存活的（live）”。
 
 Tracing collectors differ from reference-counting collectors in that they can handle circular structures. The catch with most tracing collectors is the marking phase, which entails a wait before being able to reclaim non-referenced memory.
 
