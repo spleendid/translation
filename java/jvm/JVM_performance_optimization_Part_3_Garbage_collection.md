@@ -75,9 +75,11 @@ The main difficulty with reference counting collectors is keeping the reference 
 
 *Tracing collectors* are based on the assumption that all live objects can be found by iteratively tracing all references and subsequent references from an initial set of known to be live objects. The initial set of live objects (called root objects or just roots for short) are located by analyzing the registers, global fields, and stack frames at the moment when a garbage collection is triggered. After an initial live set has been identified, the tracing collector follows references from these objects and queues them up to be marked as live and subsequently have their references traced. Marking all found referenced objects live means that the known live set increases over time. This process continues until all referenced (and hence all live) objects are found and marked. Once the tracing collector has found all live objects, it will reclaim the remaining memory.
 
-*引用跟踪垃圾回收器*基于这样一种假设，所有存活对象都可以通过迭代地跟踪从已知存活对象集中对象发出的引用及引用的引用来找到。可以通过对寄存器、全局域、以及触发垃圾回收时栈帧的分析来确定初始存活对象的集合（称为“根对象”，或简称为“根”）。在确定了初始存活对象集后，引用跟踪垃圾回收器会跟踪从这些对象中发出的引用，并找到的对象标记为“存活的（live）”。
+*引用跟踪垃圾回收器*基于这样一种假设，所有存活对象都可以通过迭代地跟踪从已知存活对象集中对象发出的引用及引用的引用来找到。可以通过对寄存器、全局域、以及触发垃圾回收时栈帧的分析来确定初始存活对象的集合（称为“根对象”，或简称为“根”）。在确定了初始存活对象集后，引用跟踪垃圾回收器会跟踪从这些对象中发出的引用，并将找到的对象标记为“活的（live）”。标记所有找到的对象意味着已知存货对象的集合会随时间而增长。这个过程会一直持续到所有被引用的对象（因此是“存活的”对象）都被标记。当引用跟踪垃圾回收器找到所有存活的对象后，就会开始回收未被标记的对象。
 
 Tracing collectors differ from reference-counting collectors in that they can handle circular structures. The catch with most tracing collectors is the marking phase, which entails a wait before being able to reclaim non-referenced memory.
+
+不同于引用计数垃圾回收器，引用跟踪垃圾回收器可以解决循环引用的问题。大多数垃圾回收器在标记阶段中，
 
 Tracing collectors are most commonly used for memory management in dynamic languages; they are by far the most common for the Java language and have been commercially proven in production environments for many years. I'll focus on tracing collectors for the remainder of this article, starting with some of the algorithms that implement this approach to garbage collection.
 
