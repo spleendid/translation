@@ -79,17 +79,25 @@ The main difficulty with reference counting collectors is keeping the reference 
 
 Tracing collectors differ from reference-counting collectors in that they can handle circular structures. The catch with most tracing collectors is the marking phase, which entails a wait before being able to reclaim non-referenced memory.
 
-不同于引用计数垃圾回收器，引用跟踪垃圾回收器可以解决循环引用的问题。大多数垃圾回收器在标记阶段中，
+不同于引用计数垃圾回收器，引用跟踪垃圾回收器可以解决循环引用的问题。由于标记阶段的存在，大多数引用跟踪垃圾回收器无法立即释放“已死”对象所占用的内存。
 
 Tracing collectors are most commonly used for memory management in dynamic languages; they are by far the most common for the Java language and have been commercially proven in production environments for many years. I'll focus on tracing collectors for the remainder of this article, starting with some of the algorithms that implement this approach to garbage collection.
+
+引用跟踪垃圾回收器广泛用于动态语言的内存管理；到目前为止，在Java编程语言的视线中也是应用最广的，并且在多年的商业生产环境中，已经证明其实用性。在本文余下的内容中，我将从一些相关的实现算法开始，介绍引用跟踪垃圾回收器，
 
 
 #Tracing collector algorithms#
 
+#引用跟踪垃圾回收器算法#
+
 *Copying* and *mark-and-sweep* garbage collection are not new, but they're still the two most common algorithms that implement tracing garbage collection today.
+
+*拷贝*和*标记-清理*垃圾回收算法并非新近发明，但仍然是当今实现引用跟踪垃圾回收器最常用的两种算法。
 
 
 ##Copying collectors##
+
+##拷贝垃圾回收器##
 
 Traditional copying collectors use a *from-space* and a *to-space* -- that is, two separately defined address spaces of the heap. At the point of garbage collection, the live objects within the area defined as from-space are copied into the next available space within the area defined as to-space. When all the live objects within the from-space are moved out, the entire from-space can be reclaimed. When allocation begins again it starts from the first free location in the to-space.
 
