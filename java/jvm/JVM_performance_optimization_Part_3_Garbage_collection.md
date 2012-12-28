@@ -101,70 +101,122 @@ Tracing collectors are most commonly used for memory management in dynamic langu
 
 Traditional copying collectors use a *from-space* and a *to-space* -- that is, two separately defined address spaces of the heap. At the point of garbage collection, the live objects within the area defined as from-space are copied into the next available space within the area defined as to-space. When all the live objects within the from-space are moved out, the entire from-space can be reclaimed. When allocation begins again it starts from the first free location in the to-space.
 
+传统的拷贝垃圾回收器会使用一个“from”区和一个“to”区，它们是堆中两个不同的地址空间。在执行垃圾回收时，from区中存活对象会被拷贝到to区。当from区中所有的存活对象都被拷贝到to后，垃圾回收器会回收整个from区。当再次分配内存时，会首先从to区中的空闲地址开始分配。
+
 In older implementations of this algorithm the from-space and to-space switch places, meaning that when the to-space is full, garbage collection is triggered again and the to-space becomes the from-space, as shown in Figure 1.
 
-
-Figure 1. A traditional copying garbage collection sequence
+在该算法的早期实现中，from区和to区会在垃圾回收周期后进行交换，即当to区被填满后，将再次启动垃圾回收，这是to区会“变成”from区。如图Figure 1所示。
 
 ![Figure 1. A traditional copying garbage collection sequence](images/jvmseries3-fig1.png?raw=true "Figure 1. A traditional copying garbage collection sequence")
 
+Figure 1. A traditional copying garbage collection sequence
+
 More modern implementations of the copying algorithm allow for arbitrary address spaces within the heap to be assigned as to-space and from-space. In these cases they do not necessarily have to switch location with each other; rather, each becomes another address space within the heap.
+
+在该算法的近期实现中，可以将堆中任意地址空间指定为from区和to区，这样就不再需要交换from区和to区，堆中任意地址空间都可以成为from区或to区。
 
 One advantage of copying collectors is that objects are allocated together tightly in the to-space, completely eliminating fragmentation. Fragmentation is a common issue that other garbage collection algorithms struggle with; something I'll discuss later in this article.
 
+拷贝垃圾回收器的一个优点是存活对象的位置会被to区中重新分配，紧凑存放，可以完全消除碎片化。碎片化是其他垃圾回收算法所要面临的一大问题，这点会在后续讨论。
 
-##Downsides of copying collectors##
+
+###Downsides of copying collectors###
+
+###拷贝垃圾回收的缺陷###
 
 Copying collectors are usually *stop-the-world* collectors, meaning that no application work can be executed for as long as the garbage collection is in cycle. In a stop-the-world implementation, the larger the area you need to copy, the higher the impact on your application performance will be. This is a disadvantage for applications that are sensitive to response time. With a copying collector you also need to consider the worst-case scenario, when everything is live in the from-space. You always have to leave enough headroom for live objects to be moved, which means the to-space must be large enough to host everything in the from-space. The copying algorithm is slightly memory inefficient due to this constraint.
+
+通常来说，拷贝垃圾回收器是“stop-the-world”式的，即在垃圾回收周期内，应用程序是被挂起的，无法工作。在“stop-the-world”式的实现中，岁需要拷贝的区域越大，对应用程序的性能所造成的影响也越大。对于那些非常注重响应时间的应用程序来说，这是难以接受的。使用拷贝垃圾回收时，你还需要考虑一下最坏情况，即当from区中所有的对象都是存活对象的时候。因此，你不得不给存活对象预留出足够的空间，也就是说to区必须足够大，大到可以将from区中所有的对象都放进去。正是由于这个缺陷，拷贝垃圾回收算法在内存使用效率上略有不足。
 
 
 ##Mark-and-sweep collectors##
 
+##标记-清理垃圾回收器##
+
 Most commercial JVMs deployed in enterprise production environments run mark-and-sweep (or marking) collectors, which do not have the performance impact that copying collectors do. Some of the most famous marking collectors are CMS, G1, GenPar, and DeterministicGC (see [Resources][13]).
+
+大多数部署在企业生产环境的商业JVM都使用了标记-清理（或标记）垃圾回收器，这种垃圾回收器并不会想拷贝垃圾回收器那样对应用程序的性能有那么大的影响。其中最著名的几款是CMS、G1、GenPar和DeterministicGC（参见[相关资源][13]）。
 
 A *mark-and-sweep* collector traces references and marks each found object with a "live" bit. Usually a set bit corresponds to an address or in some cases a set of addresses on the heap. The live bit can, for instance, be stored as a bit in the object header, a bit vector, or a bit map.
 
+*标记-清理*垃圾回收器会跟踪引用，并使用标记位将每个找到的对象标记位“live”。通常来说，每个标记位都关联着一个地址或堆上的一个地址集合。例如，标记位可能是对象头（object header）中一位，一个位向量，或是一个位图。
+
 After everything has been marked live, the sweep phase will kick in. If a collector has a sweep phase it basically includes some mechanism for traversing the heap again (not just the live set but the entire heap length) to locate all the non-marked chunks of consecutive memory address spaces. Unmarked memory is free and reclaimable. The collector then links together these unmarked chunks into organized free lists. There can be various free lists in a garbage collector -- usually organized by chunk sizes. Some JVMs (such as JRockit Real Time) implement collectors with heuristics that dynamically size-range lists based on application profiling data and object-size statistics.
 
+当所有的存活对象都被标记位“live”后，将会开始*清理*阶段。一般来说，垃圾回收器的清理阶段包含了通过再次遍历堆（不仅仅是标记位live的对象集合，而是整个堆）来定位内存地址空间中未被标记的区域，并将其回收。然后，垃圾回收器会将这些被回收的区域保存到空闲列表（free list）中。在垃圾回收器中可以同时存在多个空闲列表——通常会按照保存的内存块的大小进行划分。某些JVM（例如JRockit实时系统， JRockit Real Time System）在实现垃圾回收器时会给予应用程序分析数据和对象大小统计数据来动态调整空闲列表所保存的区域块的大小范围。
+
 When the sweep phase is complete allocation will begin again. New allocation areas are allocated from the free lists and memory chunks could be matched to object sizes, object size averages per thread ID, or the application-tuned TLAB sizes. Fitting free space more closely to the size of what your application is trying to allocate optimizes memory and could help reduce fragmentation.
+
+当清理阶段结束后，应用程序就可以再次启动了。给新创建的对象分配内存时会从空闲列表中查找，而空闲列表中内存块的大小需要匹配于新创建的对象大小、某个线程中平均对象大小，或应用程序所设置的TLAB的大小。从空闲列表中为新创建的对象找到大小合适的内存区域块有助于优化内存的使用，减少内存中的碎片。
 
 
 >More about TLAB sizes
 >
 >TLAB and TLA (Thread Local Allocation Buffer or Thread Local Area) partitioning are discussed in [JVM performance optimization, Part 1][2].
 
+>关于TLAB
+>
+>更多关于TLAB和TLA（Thread Local Allocation Buffer和Thread Local Area）的内容，请参见[JVM performance optimization, Part 1][2]。
 
-##Downsides of mark-and-sweep collectors##
+
+###Downsides of mark-and-sweep collectors###
+
+###标记-清理垃圾回收器的缺陷###
 
 The mark phase is dependent on the amount of live data on your heap, while the sweep phase is dependent on the heap size. Since you have to wait until both the *mark* and *sweep* phases are complete to reclaim memory, this algorithm causes pause-time challenges for larger heaps and larger live data sets.
 
+标记阶段的时长取决于堆中存活对象的总量，而清理阶段的时长则依赖于堆的大小。由于在*标记*阶段和*清理*阶段完成前，你无事可做，因此对于那些具有较大的堆和较多存活对象的应用程序来说，使用此算法需要想办法解决暂停时间（pause-time）较长这个问题。
+
 One way that you can help heavily memory-consuming applications is to use GC-tuning options that accommodate various application scenarios and needs. Tuning can, in many cases, help at least postpone either of these phases from becoming a risk to your application or service-level agreements (SLAs). (An SLA specifies that the application will meet certain application response times -- i.e., latency.) Tuning for every load change and application modification is a repetitive task, however, as the tuning is only valid for a specific workload and allocation rate.
+
+对于那些内存消耗较大的应用程序来说，你可以使用一些GC调优选项来满足其在某些场景下的特殊需求。很多时候，调优至少可以将标记-清理阶段给应用程序或性能要求（SLA，SLA指定了应用程序需要达到的响应时间的要求，即延迟）所带来的风险推后。当负载和应用程序发生改变后，需要重新调优，因为某次调优只对特定的工作负载和内存分配速率有效。
 
 
 ##Implementations of mark-and-sweep##
 
+##标记-清理算法的实现##
+
 There are at least two commercially available and proven approaches for implementing mark-and-sweep collection. One is the parallel approach and the other is the concurrent (or mostly concurrent) approach.
+
+目前，标记-清理垃圾回收算法至少已有2种商业实现，并且都已在生产环境中被证明有效。其一是并行垃圾回收，另一个是并发（或多数时间并发）垃圾回收。
 
 
 ###Parallel collectors###
 
+###并行垃圾回收器###
+
 *Parallel collection* means that resources assigned to the process are used in parallel for the purpose of garbage collection. Most commercially implemented parallel collectors are monolithic stop-the-world collectors -- all application threads are stopped until the entire garbage collection cycle is complete. Stopping all threads allows all resources to be efficiently used in parallel to finish the garbage collection through the mark and sweep phases. This leads to a very high level of efficiency, usually resulting in high scores on throughput benchmarks such as [SPECjbb][14]. If throughput is essential for your application, the parallel approach is an excellent choice.
 
+*并行垃圾回收*指的是垃圾回收是多线程并行完成的。大多数商业实现的并行垃圾回收器都是stop-the-world式的垃圾回收器，即在整个垃圾回收周期结束前，所有应用程序线程都会被挂起。挂起所有应用程序线程使垃圾回收器可以以并行的方式，更有效的完成标记和清理工作。并行使得效率大大提高，通常可以在像[SPECjbb][14]这样的吞吐量基准测试中跑出高分。如果你的应用程序好似有限考虑吞吐量的，那么并行垃圾回收是你最好的选择。
+
 The cost of most parallel collection -- and do consider this, especially for production environments -- is that application threads cannot do any work during a GC, just like with copying collectors. Using a parallel collector that implements stop-the-world collection will have a major impact on response-time sensitive applications, especially if you have a lot of references to trace, which will happen with many live or complex data structures on the heap. (Remember that for mark-and-sweep collectors the time to free up new memory is dependent on the time it takes to trace the live data set plus the time to traverse the heap during the sweep phase.) For a monolithic parallel approach using all resources in parallel, this entire time will be a pause, and that pause corresponds to the entire GC cycle.
+
+对于大多数并行垃圾回收器来说，尤其是考虑到应用于生产环境中，最大的问题是，像拷贝垃圾回收算法一样，在垃圾回收周期内应用程序无法工作。使用stop-the-world式的并行垃圾回收会对优先考虑响应时间的应用程序产生较大影响，尤其是当你有大量的引用需要跟踪，而此时恰好又有大量的、具有复杂结构的对象存活于堆中的时候，情况将更加糟糕。（记住，标记-清理垃圾回收器回收内存的时间取决于跟踪存活对象中所有引用的时间与遍历整个堆的时间之和。）以并行方式执行垃圾回收所导致的应用程序暂停会一直持续到整个垃圾回收周期结束。
 
 
 ###Concurrent collectors###
 
+###并发垃圾回收器###
+
 A concurrent collector is a much better fit for applications that are sensitive to response time. Concurrent means that some (or most) garbage collection work is performed concurrently with the running application threads. As not all resources are used for GC, you will have the challenge of deciding when to start a garbage collection in order to allow enough time for the cycle to end. You need enough time to trace the live set and reclaim the memory before the application runs out of memory. If the garbage collection doesn't complete in time the application will throw an out-of-memory error. You don't want to do garbage collection all the time because that would consume application resources, thus impacting throughput. It can be extra tricky to keep that balance in very dynamic environments, so heuristics have been designed to determine when to start garbage collection and when to do various GC optimizing tasks and how much at a time, etc.
+
+并发垃圾回收器更适用于那些对响应时间比较敏感的应用程序。并发指的是一些（或大多数）垃圾回收工作可以与应用程序线程同时运行。由于并非所有的资源都由垃圾回收器使用，因此这里所面临的问题如何决定何时开始执行垃圾回收，可以保证垃圾回收顺利完成。这里需要足够的时间来跟踪存活对象即的引用，并在应用程序出现OOM错误前回收内存。如果垃圾回收器无法及时完成，则应用程序就会抛出OOM错误。此外，一直做垃圾回收也不好，会不必要的消耗应用程序资源，从而影响应用程序吞吐量。要想在动态环境中保持这种平衡就需要一些技巧，因此设计了启发式方法来决定何时开始垃圾回收，何时执行不同的垃圾回收优化任务，以及一次执行多少垃圾回收优化任务等。
 
 Another challenge is to determine when it is safe to perform operations that require a complete and true snapshot of the world -- for instance, you need to know when all live objects have been marked, and thus when to switch to the sweep phase. In the monolithic stop-the-world scenario employed by most parallel collectors, this *phase-switching* is less tricky because the world is already standing still. But in concurrent implementations it might not be safe to switch phases immediately. For instance, if an application has modified an area that has already been traced and marked by the collector, new or unmarked references may have been touched, which would make them live. In some implementations this situation will put your application at risk for long-time running re-marking loops, potentially making it hard for your application to get new free memory when it needs it.
 
+并发垃圾回收器所面临的另一个挑战是如何决定何时执行一个需要完整堆快照的操作时安全的，例如，你需要知道是何时标记所有存活对象的，这样才能转而进入清理阶段。在大多数并行垃圾回收器采用的stop-the-world方式中，*阶段转换（phase-switching）*并不需要什么技巧，因为世界已静止（堆上对象暂时不会发生变化）。但是，在并发垃圾回收中，转换阶段时可能并不是安全的。例如，如果应用程序修改了一块垃圾回收器已经标记过的区域，可能会涉及到一些新的或未被标记的引用，而这些引用使其指向的对象成为存活状态。在某些并发垃圾回收的实现中，这种情况有可能会使应用程序陷入长时间运行重标记（re-mark）的循环，因此当应用程序需要分配内存时无法得到足够做的空闲内存。
+
 The takeaway from this discussion so far is that you have numerous options among garbage collectors and GC algorithms, some better suited than others to specific application types and workloads. Not only are there different algorithms, but there are actually different implementations of the various algorithms. So it is wise to be informed about your application's allocation needs and characteristics before simply specifying a garbage collector on the command line. In the next section we'll look at some of the pitfalls of the Java platform memory model -- and by pitfalls I mean places where Java developers tend to make assumptions that lead to worse performance for dynamic production loads, not better.
+
+到目前为止的讨论中，已经介绍了各种垃圾回收器和垃圾回收算法，他们各自适用于不同的场景，满足不同应用程序的需求。各种垃圾回收方式不仅在算法上有所区别，在具体实现上也不尽相同。所以，在命令行中指定垃圾回收器之前，最好能了解应用程序的需求及其自身特点。在下一节中，将介绍Java平台内存模型中的陷阱，在这里，陷阱指的是在动态生产环境中，Java程序员常常做出的一些中使性能更糟，而非更好的假设。
 
 
 #Why tuning doesn't replace garbage collection#
 
+#为什么调优无法取代垃圾回收#
+
 Most Java developers know that there are choices to be made if you want to maximize Java performance. The current variety of JVMs, garbage collectors, and the overwhelming selection of tuning options can lead developers to spend a lot of deployment time on the never-ending task of performance tuning. This has led some to conclude that GC is bad and that tuning so that GC happens infrequently or for just a short time is a successful workaround. But there are risks to doing GC this way.
+
 
 Consider what it means to tune against specific application needs. Most tuning parameters -- such as allocation rate, object sizes, timing of response-time sensitive tasks, and how fast objects die -- are tuned specifically for the application's allocation rate, such as the test workload at hand. The end result could be either (or both) of these:
 
