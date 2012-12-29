@@ -257,7 +257,7 @@ Over time, as an application runs, these fragments of unusable memory will appea
 
 _OutOfMemoryErrors_, hung processes, and logs showing that your garbage collector is working overtime are all symptoms of a GC struggling to free up memory, and are indicators of a fragmented heap. While some developers seek to resolve fragmentation by simply re-tuning their garbage collector, I argue that we should explore more innovative solutions to the problem of fragmentation before it becomes an issue for GC. The remainder of this article will focus on the two most effective approaches to managing fragmentation: generational garbage collection and compaction.
 
-_OOM错误（OutOfMemoryErrors）_会挂起进程，日志中显示的垃圾回收器很忙，是垃圾回收器努力释放内存的标志，也说明了堆中碎片非常多。一些开发人员通过重新调优垃圾回收器来解决碎片化的问题，但我觉着在解决碎片问题成为垃圾回收的使命之前应该用一些更有新意的方法来解决这个问题。本文后面的内容将聚焦于能有效解决碎片化问题的方法：粉黛式垃圾回收和压缩。
+_OOM错误（OutOfMemoryErrors）_会挂起进程，日志中显示的垃圾回收器很忙，是垃圾回收器努力释放内存的标志，也说明了堆中碎片非常多。一些开发人员通过重新调优垃圾回收器来解决碎片化的问题，但我觉着在解决碎片问题成为垃圾回收的使命之前应该用一些更有新意的方法来解决这个问题。本文后面的内容将聚焦于能有效解决碎片化问题的方法：分代式垃圾回收和压缩。
 
 
 #Generational garbage collection#
