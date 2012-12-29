@@ -1,3 +1,6 @@
+JVM性能优化， Part 3 —— 垃圾回收
+====================================================
+
 
 原文地址： [http://www.javaworld.com/javaworld/jw-10-2012/121010-jvm-performance-optimization-garbage-collection.html?page=1][15]
 
