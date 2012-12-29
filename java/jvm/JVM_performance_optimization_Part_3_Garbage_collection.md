@@ -34,6 +34,7 @@ A garbage collector should never reclaim an actively referenced object; to do so
 1. To quickly free unreferenced memory in order to satisfy an application's allocation rate so that it doesn't run out of memory.
 2. To reclaim memory while minimally impacting the performance (e.g., latency and throughput) of a running application.
 
+
 1. 快速释放不可达对象所占用的内存，防止应用程序出现OOM错误。
 2. 回收内存时，对应用程序的性能（指延迟和吞吐量）的影响要紧性能小。
     
@@ -127,7 +128,7 @@ One advantage of copying collectors is that objects are allocated together tight
 
 Copying collectors are usually *stop-the-world* collectors, meaning that no application work can be executed for as long as the garbage collection is in cycle. In a stop-the-world implementation, the larger the area you need to copy, the higher the impact on your application performance will be. This is a disadvantage for applications that are sensitive to response time. With a copying collector you also need to consider the worst-case scenario, when everything is live in the from-space. You always have to leave enough headroom for live objects to be moved, which means the to-space must be large enough to host everything in the from-space. The copying algorithm is slightly memory inefficient due to this constraint.
 
-通常来说，拷贝垃圾回收器是“stop-the-world”式的，即在垃圾回收周期内，应用程序是被挂起的，无法工作。在“stop-the-world”式的实现中，岁需要拷贝的区域越大，对应用程序的性能所造成的影响也越大。对于那些非常注重响应时间的应用程序来说，这是难以接受的。使用拷贝垃圾回收时，你还需要考虑一下最坏情况，即当from区中所有的对象都是存活对象的时候。因此，你不得不给存活对象预留出足够的空间，也就是说to区必须足够大，大到可以将from区中所有的对象都放进去。正是由于这个缺陷，拷贝垃圾回收算法在内存使用效率上略有不足。
+通常来说，拷贝垃圾回收器是“stop-the-world”式的，即在垃圾回收周期内，应用程序是被挂起的，无法工作。在“stop-the-world”式的实现中，所需要拷贝的区域越大，对应用程序的性能所造成的影响也越大。对于那些非常注重响应时间的应用程序来说，这是难以接受的。使用拷贝垃圾回收时，你还需要考虑一下最坏情况，即当from区中所有的对象都是存活对象的时候。因此，你不得不给存活对象预留出足够的空间，也就是说to区必须足够大，大到可以将from区中所有的对象都放进去。正是由于这个缺陷，拷贝垃圾回收算法在内存使用效率上略有不足。
 
 
 ##Mark-and-sweep collectors##
@@ -227,6 +228,7 @@ Consider what it means to tune against specific application needs. Most tuning p
 1. Things that worked during testing fail in production.
 2. Workload or application changes require you to re-tune the application entirely.
 
+
 1. 测试时正常，上线就失败。
 2. 一旦应用程序本身，或工作负载发生改变，就需要全部重调。
 
@@ -303,6 +305,7 @@ My rule-of-thumb for tuning nursery size is that it should be as large as you ca
 3. When you see frequent promotion failures it is usually a sign that your old space is fragmented. Promotion failure means that there isn't a large enough space in old space to fit a surviving object from young space. If this happens, consider tweaking the promotion rate (the age tuning option) or make sure your old-space GC algorithm is a compacting one (discussed in the next section) and tune the compaction in a way that fits your current application load. You may also increase the heap size and generation sizes, but doing so could impact the pause times of old space collections further -- remember that fragmentation is inevitable!
 4. A generational collector work best for any Java application that has many short-lived small objects that will die within their first collection cycle. Generational GC works well to reduce fragmentation in this scenario, mainly by postponing it to a point in the application lifecycle where it may no longer be an issue.
 
+
 1. 大多数年轻代垃圾回收都是stop-the-world式的，年轻代越大，相应的暂停时间越长。所以，对于那些受GC暂停影响较大的应用程序来说，应该仔细斟酌年轻代的大小。
 2. 你可以综合考虑不同代的垃圾回收算法。可以在年轻代使用并行垃圾回收，而在老年代使用并行垃圾回收。
 3. 当提升失败频繁发生时，这通常说明老年代中的碎片较多。提升失败指的是老年代中没有足够大的空间来存放年轻代中的存货对象。当出现提示失败时，你可以微调对象提升速率（即调整对象提升时年龄），或者确保老年代垃圾回收算法会将对象进行压缩（将在下一节讨论），并以一种适合当前应用程序工作负载的方式调整压缩。你也可以增大堆和各个代的大小，但这会使老年代垃圾回收的暂停时间延长——记住，碎片化是不可避免的。
@@ -358,6 +361,7 @@ For now, I'll leave you with an overview of the main points about garbage collec
 4. Generational garbage collection helps postpone fragmentation, but does not eliminate it. Generational GC divides the heap into two spaces, one for allocating young objects and one for objects that (being still referenced) have survived young-space GC. Use a generational collector for any Java application that has many short-lived small objects that will die within their first collection cycle.
 5. Compaction is the only way to handle fragmentation completely. Most collectors have to perform compaction as a stop-the-world operation. The longer an application runs, the more reference complexity it will have and the more heterogeneous its object-size distribution will be. These factors will result in longer pauses to complete compaction. Larger heap size also impacts the compaction pause because there will likely be more live data and more references to update.
 6. Tuning can help postpone OutOfMemoryErrors but the trade-off of too much tuning is rigidity. Be sure that you understand your production-load dynamics as well as your application's object types and reference profile before initiating tuning by trial-and-error. A too-rigid configuration will most likely break under dynamic production loads. Be sure to understand the consequences of a non-dynamic value before setting it.
+
 
 1. 不同的垃圾回收算法的方式是为满足不同的应用程序需求而设计。目前在商业环境中，应用最为广泛的是引用跟踪垃圾回收器。
 2. 并行垃圾回收器会并行使用可用资源执行垃圾回收任务。这种策略的常用实现是stop-the-world式垃圾回收器，使用所有可用系统资源快速完成垃圾回收任务。因此，并行垃圾回收可以提供较高的吞吐量，但在垃圾回收的过程中，所有应用程序线程都会被挂起，对延迟有较大影响。
