@@ -332,17 +332,25 @@ The pause time for compaction is dependent on how much memory you need to move a
 
 The _application memory wall_ refers to the maximum heap size you can set before GC pause time (i.e., compaction) interferes with your application enough to break a response-time SLA. Most Java applications today hit their application memory wall at between 4 GB and 20 GB per JVM, dependent on system and application. This is one reason that most enterprise applications are deployed in multiple smaller JVMs instead of using fewer larger (50- to 60-GB) instances. Let's think about this for a minute: Isn't it interesting how much of Java application design and deployment architecture in modern enterprises are defined by the limitations of compaction in the JVM? In this case, we've accepted multi-mini-instance deployments that are costly to manage over time, in order to work around the problem of stop-the-world interruptions needed to deal with fragmented heaps. This is particularly peculiar given how much large-memory capacity we have in modern hardware, and given the ever-increasing demand for more memory access in enterprise Java applications. Why should we settle for just a few gigabytes per instance? Concurrent compaction is an alternate approach that brings down the application memory wall, and will be the topic of my next article in this series.
 
-_应用程序内存墙_
+_应用程序内存墙_涉及到在GC暂停时间对应用程序的影响大到无法达到满足预定需求之前所能设置的的堆的最大值。目前，大部分Java应用程序在碰到内存墙时，每个JVM实例的堆大小介于4GB到20GB之间，具体数值依赖于具体的环境和应用程序本身。这也是大多数企业及应用程序会部署多个小堆JVM而不是部署少数大堆（50到60GB）JVM的原因之一。在这里，我们需要思考一下：现代企业中有多少Java应用程序的设计与部署架构受制于JVM中的压缩？在这种情况下，我们接受多个小实例的部署方案，以增加管理维护时间为代价，绕开为处理充满碎片的堆而执行stop-the-world式垃圾回收所带来的问题。考虑到现今的硬件性能和企业级Java应用程序中对内存越来越多的访问要求，这种方案是在非常奇怪。为什么仅仅只能给每个JVM实例设置这么小的堆？并发压缩是一种可选方法，它可以降低内存墙带来的影响，这将是本系列中下一篇文章的主题。
 
 
 >The observed average pause time per 1 to 2 GB live data is one second. So in a 4 GB heap, it is likely you will have at least 25 percent live data and will occasionally experience a near one-second pause time.
 
+>从已观察到的数据看，每压缩1到2GB存活数据的需要约1秒钟。所以，对于4GB的堆来说，很可能会有至少25%的存活数据，从而导致约1秒钟的暂停。
+
 
 #Conclusion: Reflection points and highlights#
 
+#总结：回顾#
+
 This article has been an overview of garbage collection, with the goal of refreshing your knowledge about the concepts and mechanics of garbage collection, as well as your awareness of the range of available options. Hopefully it also inspires you to further reading. Most of the options I've discussed are fairly traditional, in that they work implicitly with the limitations of the JVM. In my next article I'll introduce a newer concept, concurrent compaction, which is currently only implemented by Azul's Zing JVM. Concurrent compaction is one of an emerging class of GC techniques that seek to re-imagine the capacity of Java's memory model, particularly in light of today's increased memory and processor capacity.
 
+本文对垃圾回收做了总体介绍，目的是为了使你能了解垃圾回收的相关概念和基本知识。希望本文能激发你继续深入阅读相关文章的兴趣。这里所介绍的大部分内容，它们。在下一篇文章中，我将介绍一些较新颖的概念，并发压缩，目前只有Azul公司的Zing JVM实现了这一技术。并发压缩是对GC技术的综合运用，这些技术试图重新构建Java内存模型，考虑当今内存容量与处理能力的不断提升，这一点尤为重要。
+
 For now, I'll leave you with an overview of the main points about garbage collection discussed in this article:
+
+现在，回顾一下本文中所介绍的关于垃圾回收的一些内容：
 
 1. Different garbage collection algorithms and approaches will meet different application needs. Tracing collectors are most commonly used in commercial Java environments.
 2. Parallel garbage collection uses available resources in parallel to perform GC. This tactic is usually implemented as a monolithic, stop-the-world collector, using all available system resources for a fast GC. Parallel GC thus provides higher throughput, but all application threads must wait until it's finished, which impacts latency.
@@ -351,12 +359,21 @@ For now, I'll leave you with an overview of the main points about garbage collec
 5. Compaction is the only way to handle fragmentation completely. Most collectors have to perform compaction as a stop-the-world operation. The longer an application runs, the more reference complexity it will have and the more heterogeneous its object-size distribution will be. These factors will result in longer pauses to complete compaction. Larger heap size also impacts the compaction pause because there will likely be more live data and more references to update.
 6. Tuning can help postpone OutOfMemoryErrors but the trade-off of too much tuning is rigidity. Be sure that you understand your production-load dynamics as well as your application's object types and reference profile before initiating tuning by trial-and-error. A too-rigid configuration will most likely break under dynamic production loads. Be sure to understand the consequences of a non-dynamic value before setting it.
 
+1. 不同的垃圾回收算法的方式是为满足不同的应用程序需求而设计。目前在商业环境中，应用最为广泛的是引用跟踪垃圾回收器。
+2. 并行垃圾回收器会并行使用可用资源执行垃圾回收任务。这种策略的常用实现是stop-the-world式垃圾回收器，使用所有可用系统资源快速完成垃圾回收任务。因此，并行垃圾回收可以提供较高的吞吐量，但在垃圾回收的过程中，所有应用程序线程都会被挂起，对延迟有较大影响。
+3. 并发垃圾回收器可以与应用程序并发工作。使用并发垃圾回收器时要注意的是，确保在应用程序发生OOM错误之前完成垃圾回收。
+4. 分代式垃圾回收可以推迟碎片化的出现，但并不能消除碎片化。它将堆分为两块空间，一块用于存放“年轻对象”，另一块用于存放从年轻代中存活下来的存活对象。对于那些使用了很多具有较短生命周期活不过几次垃圾回收周期的Java应用程序来说，使用分代式垃圾回收是非常合适的。
+5. 压缩是可以完全解决碎片化的唯一方法。大多数垃圾回收器在压缩的时候是都stop-the-world式的。应用程序运行的时间越长，对象间的引就用越复杂，对象大小的异质性也越高。相应的，完成压缩所需要的时间也越长。如果堆的大小较大的话也会对压缩所占产生的暂停有影响，因为较大的堆就会有更多的活动数据和更多的引用需要处理。
+6. 调优可以推迟OOM错误的出现，但过度调优是无意义的。在通过试错方式初始调优前，一定要明确生产环境负载的动态性，以及应用程序中的对象类型和对象间的引用情况。在动态负载下，过于刻板的配置很容会失效。在设置非动态调优选项前一定要清楚这样做后果。
+
 Next month in the _JVM performance optimization series_: An in-depth look inside the Concurrent Continuously Compacting Collector (C4) GC algorithm.
+
+下个月的_JVM性能调优系列_：深入了解C4垃圾回收器（Continuously Concurrent Compacting Collector）相关算法。
 
 
 #关于作者#
 
-Eva Andearsson对JVM计数、SOA、云计算和其他企业级中间件解决方案有着10多年的从业经验。在2001年，她以JRockit JVM开发者的身份加盟了创业公司Appeal Virtual Solutions（即BEA公司的前身）。在垃圾回收领域的研究和算法方面，EVA获得了两项专利。此外她还是提出了确定性垃圾回收（Deterministic Garbage Collection），后来形成了JRockit实时系统（JRockit Real Time）。在技术上，Eva与SUn公司和Intel公司合作密切，涉及到很多将JRockit产品线、WebLogic和Coherence整合的项目。2009年，Eva加盟了Azul System公，担任产品经理。负责新的Zing Java平台的开发工作。最近，她改换门庭，以高级产品经理的身份加盟Cloudera公司，负责管理Cloudera公司Hadoop分布式系统，致力于高扩展性、分布式数据处理框架的开发。
+Eva Andearsson对JVM计数、SOA、云计算和其他企业级中间件解决方案有着10多年的从业经验。在2001年，她以JRockit JVM开发者的身份加盟了创业公司Appeal Virtual Solutions（即BEA公司的前身）。在垃圾回收领域的研究和算法方面，EVA获得了两项专利。此外她还是提出了确定性垃圾回收（Deterministic Garbage Collection），后来形成了JRockit实时系统（JRockit Real Time）。在技术上，Eva与Sun公司和Intel公司合作密切，涉及到很多将JRockit产品线、WebLogic和Coherence整合的项目。2009年，Eva加盟了Azul System公司，担任产品经理。负责新的Zing Java平台的开发工作。最近，她改换门庭，以高级产品经理的身份加盟Cloudera公司，负责管理Cloudera公司Hadoop分布式系统，致力于高扩展性、分布式数据处理框架的开发。
 
 
 
