@@ -34,7 +34,6 @@ A garbage collector should never reclaim an actively referenced object; to do so
 1. To quickly free unreferenced memory in order to satisfy an application's allocation rate so that it doesn't run out of memory.
 2. To reclaim memory while minimally impacting the performance (e.g., latency and throughput) of a running application.
 
-
 1. 快速释放不可达对象所占用的内存，防止应用程序出现OOM错误。
 2. 回收内存时，对应用程序的性能（指延迟和吞吐量）的影响要紧性能小。
     
@@ -228,7 +227,6 @@ Consider what it means to tune against specific application needs. Most tuning p
 1. Things that worked during testing fail in production.
 2. Workload or application changes require you to re-tune the application entirely.
 
-
 1. 测试时正常，上线就失败。
 2. 一旦应用程序本身，或工作负载发生改变，就需要全部重调。
 
@@ -304,7 +302,6 @@ My rule-of-thumb for tuning nursery size is that it should be as large as you ca
 2. You can mix GC algorithms for your heap generations. You could potentially make the young generation GC parallel, while using a concurrent algorithm for old space collection.
 3. When you see frequent promotion failures it is usually a sign that your old space is fragmented. Promotion failure means that there isn't a large enough space in old space to fit a surviving object from young space. If this happens, consider tweaking the promotion rate (the age tuning option) or make sure your old-space GC algorithm is a compacting one (discussed in the next section) and tune the compaction in a way that fits your current application load. You may also increase the heap size and generation sizes, but doing so could impact the pause times of old space collections further -- remember that fragmentation is inevitable!
 4. A generational collector work best for any Java application that has many short-lived small objects that will die within their first collection cycle. Generational GC works well to reduce fragmentation in this scenario, mainly by postponing it to a point in the application lifecycle where it may no longer be an issue.
-
 
 1. 大多数年轻代垃圾回收都是stop-the-world式的，年轻代越大，相应的暂停时间越长。所以，对于那些受GC暂停影响较大的应用程序来说，应该仔细斟酌年轻代的大小。
 2. 你可以综合考虑不同代的垃圾回收算法。可以在年轻代使用并行垃圾回收，而在老年代使用并行垃圾回收。
