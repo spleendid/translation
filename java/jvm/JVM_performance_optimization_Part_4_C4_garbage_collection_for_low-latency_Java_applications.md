@@ -8,6 +8,8 @@ JVM performance optimization, Part 4: C4 garbage collection for low-latency Java
 *Learn how C4's concurrently compacting garbage collection algorithm helps boost Java scalability for low-latency enterprise Java applications, in this installment of Eva Andreasson's JVM performance optimization series.*
 
 
+
+
 By now in this series it is obvious that I consider stop-the-world garbage collection to be a serious roadblock to Java application scalability, which is fundamental to modern Java enterprise development. Fortunately, some newer flavors of JVMs are finding ways to either fine-tune stop-the-world garbage collection or -- better yet -- do away with its lengthy pauses altogether. I am excited about new approaches to Java scalability that fully leverage the potential of multicore systems, where memory is cheap and plentiful.
 
 In this article I focus primarily on the C4 algorithm, which is an upgrade of the Azul Systems Pauseless GC algorithm, currently implemented only for the Zing JVM. I also briefly discuss Oracle's G1 and IBM's Balanced Garbage Collection Policy algorithms. I hope that learning about these different approaches to garbage collection will expand your sense of what is possible with Java's memory-management model and with Java application scalability. Perhaps it will even inspire you to come up with some new innovative ideas for handling compaction? You will at least know more about your options when choosing a JVM, along with some basic guidelines for different application scenarios. (Note that this article focuses on low-latency and latency-sensitive Java applications.)
