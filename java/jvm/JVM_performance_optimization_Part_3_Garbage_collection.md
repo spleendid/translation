@@ -80,7 +80,7 @@ The main difficulty with reference counting collectors is keeping the reference 
 
 *Tracing collectors* are based on the assumption that all live objects can be found by iteratively tracing all references and subsequent references from an initial set of known to be live objects. The initial set of live objects (called root objects or just roots for short) are located by analyzing the registers, global fields, and stack frames at the moment when a garbage collection is triggered. After an initial live set has been identified, the tracing collector follows references from these objects and queues them up to be marked as live and subsequently have their references traced. Marking all found referenced objects live means that the known live set increases over time. This process continues until all referenced (and hence all live) objects are found and marked. Once the tracing collector has found all live objects, it will reclaim the remaining memory.
 
-*引用跟踪垃圾回收器*基于这样一种假设，所有存活对象都可以通过迭代地跟踪从已知存活对象集中对象发出的引用及引用的引用来找到。可以通过对寄存器、全局域、以及触发垃圾回收时栈帧的分析来确定初始存活对象的集合（称为“根对象”，或简称为“根”）。在确定了初始存活对象集后，引用跟踪垃圾回收器会跟踪从这些对象中发出的引用，并将找到的对象标记为“活的（live）”。标记所有找到的对象意味着已知存货对象的集合会随时间而增长。这个过程会一直持续到所有被引用的对象（因此是“存活的”对象）都被标记。当引用跟踪垃圾回收器找到所有存活的对象后，就会开始回收未被标记的对象。
+*引用跟踪垃圾回收器*基于这样一种假设，所有存活对象都可以通过迭代地跟踪从已知存活对象集中对象发出的引用及引用的引用来找到。可以通过对寄存器、全局域、以及触发垃圾回收时栈帧的分析来确定初始存活对象的集合（称为“根对象”，或简称为“根”）。在确定了初始存活对象集后，引用跟踪垃圾回收器会跟踪从这些对象中发出的引用，并将找到的对象标记为“活的（live）”。标记所有找到的对象意味着已知存活对象的集合会随时间而增长。这个过程会一直持续到所有被引用的对象（因此是“存活的”对象）都被标记。当引用跟踪垃圾回收器找到所有存活的对象后，就会开始回收未被标记的对象。
 
 Tracing collectors differ from reference-counting collectors in that they can handle circular structures. The catch with most tracing collectors is the marking phase, which entails a wait before being able to reclaim non-referenced memory.
 
@@ -309,7 +309,7 @@ My rule-of-thumb for tuning nursery size is that it should be as large as you ca
 
 1. 大多数年轻代垃圾回收都是stop-the-world式的，年轻代越大，相应的暂停时间越长。所以，对于那些受GC暂停影响较大的应用程序来说，应该仔细斟酌年轻代的大小。
 2. 你可以综合考虑不同代的垃圾回收算法。可以在年轻代使用并行垃圾回收，而在老年代使用并行垃圾回收。
-3. 当提升失败频繁发生时，这通常说明老年代中的碎片较多。提升失败指的是老年代中没有足够大的空间来存放年轻代中的存货对象。当出现提示失败时，你可以微调对象提升速率（即调整对象提升时年龄），或者确保老年代垃圾回收算法会将对象进行压缩（将在下一节讨论），并以一种适合当前应用程序工作负载的方式调整压缩。你也可以增大堆和各个代的大小，但这会使老年代垃圾回收的暂停时间延长——记住，碎片化是不可避免的。
+3. 当提升失败频繁发生时，这通常说明老年代中的碎片较多。提升失败指的是老年代中没有足够大的空间来存放年轻代中的存活对象。当出现提示失败时，你可以微调对象提升速率（即调整对象提升时年龄），或者确保老年代垃圾回收算法会将对象进行压缩（将在下一节讨论），并以一种适合当前应用程序工作负载的方式调整压缩。你也可以增大堆和各个代的大小，但这会使老年代垃圾回收的暂停时间延长——记住，碎片化是不可避免的。
 4. 分代式垃圾回收最适用于那些具有大量短生命周期对象的应用程序，这些对象的生命周期短到活不过一次垃圾回收周期。在这种场景中，分代式垃圾回收可有效的减缓碎片化的趋势，主要是将碎片化随带来的影响推出到将来，而那时可能应用程序对此毫不关心。
 
 
