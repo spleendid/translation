@@ -41,41 +41,61 @@ C4算法将释放内存的过程从应用程序行为和内存分配速率中分
 
 Being concurrent, the C4 algorithm actually changes the premise of modern Java enterprise architecture and deployment models. Just consider what hundreds of GB per JVM instance could do for your Java applications:
 
-实际上，为了实现并发性，C4算法改变了现代Java企业级架构和部署模型的基本假设。
+实际上，为了实现并发性，C4算法改变了现代Java企业级架构和部署模型的基本假设。想象一下拥有数百GB内存的JVM会是什么样的：
 
 * What does a Java deployment look like if it's able to scale within a single JVM instance rather than across many?
 * What type of objects might be stored in memory that weren't before due to GC constraints?
 * How might distributed clusters -- be they caches, region servers, or some other type of server nodes -- change as a result of larger JVM instances? What happens to traditional node counts, node deaths, and cache misses when the JVM size can increase without negatively impacting application responsiveness?
 
-* 
-* 
-* 
+* 部署Java应用程序时，对伸缩性的考量无需要多个JVM配合，在单一JVM实例中即可完成。这时的部署是什么样呢？
+* 有哪些以往因GC限制而无法在内存存储的对象？
+* 那些分布式集群（如缓存服务器、区域服务器，或其他类型的服务器节点）会有什么变化？当可以增加JVM内存而不会对应用程序响应时间造成负面影响时，传统的节点数量、节点死亡和缓存丢失的计算会有什么变化呢？
 
 
 #The three phases of the C4 algorithm#
 
+#C4算法的3的阶段#
+
 The main design premises of the C4 algorithm are "garbage is good" and "compaction is inevitable." C4's design goal is to be both concurrent and collaborative, thus eliminating the need for stop-the-world collection. The C4 garbage collection algorithm consists of three phases:
+
+C4算法的一个基本假设是“垃圾回收是好事”和“压缩不可避免”。C4算法的设计目标是实现垃圾回收的并发与协作，剔除stop-the-world式的垃圾回收。C4垃圾回收算法包含一下3个阶段：
 
 1. *Marking* -- finding what's live
 2. *Relocation* -- moving things together to free up larger consecutive space (also known as compaction)
 3. *Remapping* -- updating references to moved objects
 
+1. *标记（Marking）* -- 找到活动对象
+2. *重定位（Relocation）* -- 将存活对象移动到一起，以便可以释放较大的连续空间，这个阶段也可称为“压缩（compaction）”
+3. *重映射（Remapping）* -- 更新被移动的对象的引用。
+
 We'll look at each phase in detail.
 
+下面的内容将对每个阶段做详细介绍。
 
-#Marking in C4#
+
+##Marking in C4##
+
+#C4算法中的标记阶段#
 
 The *marking phase* of the C4 algorithm uses a concurrent marking and reference-tracing approach, which I discussed in detail in [Part 3][4] of this series.
 
+在C4算法中，*标记阶段（marking phase）*使用了并发标记（concurrent marking）和引用跟踪(reference-tracing)的方法来标记活动对象，这方面内容已经在本系列的[第3篇][4]中介绍过。
+
 The marking phase is started by GC threads traversing the references from known live objects in thread stacks and registers. These threads continue to trace references until all reachable objects have been found on the heap. In this phase, the C4 algorithm is quite similar to other concurrent markers.
 
+在标记阶段中，GC线程会从线程栈和寄存器中的活动对象开始，遍历所有的引用，标记找到的对象，这些GC线程会遍历堆上所有的可达（reachable）对象。在这个阶段，C4算法与其他并发标记器的工作方式非常相似。
+
 C4's marker starts to differentiate during the concurrent mark phase. If an application thread hits an unmarked object during this phase, it facilitates that object to be queued up for further reference tracing. It also ensures that the object is marked, so that it never has to be traversed again by the garbage collector or another application thread. This saves marking time and eliminates the risk of recursive remarks. (Note that a long recursive mark would potentially force the application to run out of memory before memory could be reclaimed -- a pervasive problem in most garbage collection scenarios.)
+
+C4算法的标记器与其他并发标记器的区别也是始于并发标记阶段的。在并发标记阶段中，如果应用程序线程修改未标记的对象，那么该对象会被放到一个队列中，以备遍历。这就保证了该对象最终会被标记，也因为如此，C4垃圾回收器或另一个应用程序线程不会重复遍历该对象。这样就节省了标记时间，消除了递归重标记（recursive remark）的风险。（注意，长时间的递归重标记有可能会使应用程序因无法获得足够的内存而抛出OOM错误，这也是大部分垃圾回收场景中的普遍问题。）
 
 ![Figure 1. Application threads traverse the heap just once during marking](images/jvmseries4-fig1.png?raw=true "Figure 1. Application threads traverse the heap just once during marking")
 
 Figure 1. Application threads traverse the heap just once during marking
 
 If the C4 algorithm relied on dirty-card tables or other methods of logging reads and writes into already-traversed heap areas, an application's GC threads might have to revisit certain areas for re-marking. In extreme cases a thread could get stuck in an infinite re-marking scenario -- at least infinite enough to cause the application to run out of memory before new memory could be freed. But C4 relies on a self-healing *load value barrier* (LVB), which enables application threads to immediately see if a reference is already marked. If the reference is not marked, the application thread will add it to the GC queue. Once the reference is in the queue it can't be re-marked. The application thread is free to continue on with its work.
+
+
 
 >*Dirty objects and card tables*
 >
