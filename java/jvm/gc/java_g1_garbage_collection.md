@@ -146,9 +146,9 @@ If your application requires guaranteed real-time behavior even with garbage col
 
 #References#
 
-[Bruno09] Bruno, Eric, and Bollella, Greg, Real-Time Java Development with Java RTS, Pearson Publishing, 2009
-[Detlefs04] Detlefs, et. al., [Garbage-First Garbage Collection][1], Sun Microsystems Research Laboratories, 2004.
-[McCarthy58] McCarthy, John, [LISP: A Programming System for Symbolic Manipulations][2], Communications of the ACM, 1958.
+* Bruno, Eric, and Bollella, Greg, Real-Time Java Development with Java RTS, Pearson Publishing, 2009
+* Detlefs, et. al., [Garbage-First Garbage Collection][1], Sun Microsystems Research Laboratories, 2004.
+* McCarthy, John, [LISP: A Programming System for Symbolic Manipulations][2], Communications of the ACM, 1958.
 
 
 
