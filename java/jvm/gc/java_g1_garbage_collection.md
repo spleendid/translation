@@ -3,10 +3,16 @@ G1: Java's Garbage First Garbage Collector
 
 At JavaOne 2009, Sun released Java SE 6 Update 14, which included a version of the much-anticipated Garbage First (G1) garbage collector. G1 is a low-pause, low-latency, sometimes soft real-time, collector that allows you to set max pause time goals and collection intervals through suggestions on the Java VM command line. Although it cannot guarantee it, G1 will attempt to meet your goals, and hence introduce as little latency as possible into your application. This in turn may also make the VM run more predictably as it attempts to meet the pause time goals you provide.
 
+在2009年的JavaOne大会上，Sun公司发布了Java SE 6 Update 14，在该版本中正式引入了万众期待的G1（Garbage First）垃圾回收器。G1是一款低暂停、低延迟、软实时的垃圾回收器，在使用该款垃圾回收器时可以用通过JVM命令行选项设置最大暂停时间和执行垃圾回收的间隔时间。尽管G1并不保证设置的参数能够完全起作用，但G1会尽力满足这些目标，以期可以尽可能降低应用程序的延迟。这样也可以使JVM在做垃圾回收可以更好预测垃圾回收的时长以满足预设的要求。
+
 
 #What Is Garbage Collection?#
 
+#什么是G1？#
+
 Many dynamic languages, such as C, C++, Pascal, and so on, require you to manage memory explicitly. This includes memory allocation, de-allocation, and all of the accounting that occurs in between. In this time frame, you must be sure to not lose track of the memory (thereby failing to ever free it), or the result will be a memory leak. Just as dangerous is the attempt to use an object (or access memory) after it has been de-allocated, through what is called a dangling pointer. Either one of these situations can result in undefined behavior, the accidental overwriting of other data, a security hole, or an abrupt crash.
+
+许多动态语言（译者注，这里应该是静态语言），例如c，c++，Pascal等，需要开发者显式的管理内存。管理内存包括了内存的分配、回收，以及这期间所有的相关工作。此时，开发者必须跟踪所有分配的内存，否则会无法及时释放它，进而造成内存泄漏。
 
 Automatic memory management (garbage collection) removes the likelihood that these issues will occur since it's no longer left up to you to account for memory allocations. In C++, the concept of smart pointers is one solution, and in other languages, such as Lisp, SmallTalk, and Java, a full-featured garbage collector tracks the lifetimes of all objects in a running program. The history of garbage collection can be traced back to John McCarthy, who invented the concept as part of the Lisp programming language [McCarthy58].
 
