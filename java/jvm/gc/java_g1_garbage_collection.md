@@ -37,7 +37,7 @@ Figure 1: With garbage-first, the heap is broken into equally sized regions.
 
 Regions are further broken down into 512 byte sections called cards (see Figure 2). Each card has a corresponding one-byte entry in a global card table, which is used to track which cards are modified by mutator threads. Subsets of these cards are tracked, and referred to as Remembered Sets (RS), which is discussed shortly.
 
-![Figure 2: Each region has a remembered set of occupied cards.](../images/java_g1_garbage_collector-fig1.png?raw=true "Figure 2: Each region has a remembered set of occupied cards.")
+![Figure 2: Each region has a remembered set of occupied cards.](../images/java_g1_garbage_collector-fig2.png?raw=true "Figure 2: Each region has a remembered set of occupied cards.")
 
 Figure 2: Each region has a remembered set of occupied cards.
 
@@ -48,7 +48,7 @@ The G1 collector works in stages. The main stages consist of remembered set (RS)
 
 Each region maintains an associated subset of cards that have recently been written to, called the Remembered Set (RS). Cards are placed in a region's RS via a write barrier, which is an efficient block of code that all mutator threads must execute when modifying an object reference. To be precise, for a particular region (i.e., region a), only cards that contain pointers from other regions to an object in region a are recorded in region a's RS (see Figure 3). A region's internal references, as well as null references, are ignored.
 
-![Figure 3: A region's RS tracks live references from outside the region.](../images/java_g1_garbage_collector-fig1.png?raw=true "Figure 3: A region's RS tracks live references from outside the region.")
+![Figure 3: A region's RS tracks live references from outside the region.](../images/java_g1_garbage_collector-fig2.png?raw=true "Figure 3: A region's RS tracks live references from outside the region.")
 
 Figure 3: A region's RS tracks live references from outside the region.
 
@@ -59,7 +59,7 @@ In reality, each region's remembered set is implemented as a group of collection
 
 Concurrent marking identifies live data objects per region, and maintains the pointer to the next free byte, called top. There are, however, small stop-the-world pauses (described further below) that occur to ensure the correct heap state. A marking bitmap is maintained to create a summary view of the live objects within the heap. Each bit in the bitmap corresponds to one word within the heap (an area large enough to contain an object pointer; see Figure 4). A bit in the bitmap is set when the object it represents is determined to be a live object. In reality there are two bitmaps: one for the current collection, and a second for the previously completed collection. This is one way that changes to the heap are tracked over time.
 
-![Figure 4: Live objects are indicated with a marking bitmap.](../images/java_g1_garbage_collector-fig1.png?raw=true "Figure 4: Live objects are indicated with a marking bitmap.")
+![Figure 4: Live objects are indicated with a marking bitmap.](../images/java_g1_garbage_collector-fig4.png?raw=true "Figure 4: Live objects are indicated with a marking bitmap.")
 
 Figure 4: Live objects are indicated with a marking bitmap.
 
@@ -147,5 +147,5 @@ If your application requires guaranteed real-time behavior even with garbage col
 
 
 
-[1]    http://research.sun.com/jtech/pubs/04-g1-paper-ismm.pdf    "Garbage-First Garbage Collection"
-[2]    http://portal.acm.org/citation.cfm?id=612201.612243        "LISP: A Programming System for Symbolic Manipulations"
+[1]:    http://research.sun.com/jtech/pubs/04-g1-paper-ismm.pdf    "Garbage-First Garbage Collection"
+[2]:    http://portal.acm.org/citation.cfm?id=612201.612243        "LISP: A Programming System for Symbolic Manipulations"
