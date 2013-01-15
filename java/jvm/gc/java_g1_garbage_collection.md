@@ -22,7 +22,7 @@ Until recently, Java SE came with two main collectors: the parallel collector, a
 >
 >The Java parallel collector (the default) is parallel but not concurrent as it pauses application threads to do its work. The CMS collector is parallel and partially concurrent as it pauses application threads at many points (but not all) to do its work. The G1 collector is fully parallel and mostly concurrent, meaning that it does pause applications threads momentarily, but only during certain phases of collection. For more information on garbage collection, and common algorithms used, read my latest book entitled Real-Time Java Programming with Java RTS, available from Pearson Publishing.
 >
->¡ªEJB
+>â€•EJB
 
 
 #How Does G1 Work?#
@@ -131,7 +131,7 @@ Much of the G1 processing and behavior can be controlled by explicitly setting o
 >```
 >However, Sun warns that as of this version of G1, the use of these parameters may produce in a race condition and result in an error. However, it's worth a try to see if your application works safely with them set. If so, you'll benefit from the best GC performance that G1 can offer.
 >
->¡ªEJB
+>â€•EJB
 
 In terms of GC pause times, Sun states that G1 is sometimes better and sometimes worse than CMS. As G1 is still under development, the goal is to make G1 perform better than CMS and eventually replace it in a future version of Java SE (the current target is Java SE 7). While the G1 collector is successful at limiting total pause time, it's still only a soft real-time collector. In other words, it cannot guarantee that it will not impact the application threads' ability to meet its deadlines, all of the time. However, it can operate within a well-defined set of bounds that make it ideal for soft real-time systems that need to maintain high-throughput performance.
 
