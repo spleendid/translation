@@ -79,7 +79,7 @@ We'll look at each phase in detail.
 
 The *marking phase* of the C4 algorithm uses a concurrent marking and reference-tracing approach, which I discussed in detail in [Part 3][4] of this series.
 
-在C4算法中，*标记阶段（marking phase）*使用了并发标记（concurrent marking）和引用跟踪(reference-tracing)的方法来标记活动对象，这方面内容已经在本系列的[第3篇][4]中介绍过。
+在C4算法中，*标记阶段（marking phase）* 使用了并发标记（concurrent marking）和引用跟踪(reference-tracing)的方法来标记活动对象，这方面内容已经在本系列的[第3篇][4]中介绍过。
 
 The marking phase is started by GC threads traversing the references from known live objects in thread stacks and registers. These threads continue to trace references until all reachable objects have been found on the heap. In this phase, the C4 algorithm is quite similar to other concurrent markers.
 
@@ -95,7 +95,7 @@ Figure 1. Application threads traverse the heap just once during marking
 
 If the C4 algorithm relied on dirty-card tables or other methods of logging reads and writes into already-traversed heap areas, an application's GC threads might have to revisit certain areas for re-marking. In extreme cases a thread could get stuck in an infinite re-marking scenario -- at least infinite enough to cause the application to run out of memory before new memory could be freed. But C4 relies on a self-healing *load value barrier* (LVB), which enables application threads to immediately see if a reference is already marked. If the reference is not marked, the application thread will add it to the GC queue. Once the reference is in the queue it can't be re-marked. The application thread is free to continue on with its work.
 
-如果C4算法的实现是基于脏卡表（dirty-card tables）或其他对已经遍历过的堆区域的读写操作的记录，那么应用程序的垃圾回收线程就需要重新访问这些区域做重标记。在极端条件下，垃圾回收线程会陷入到永无止境的重标记中 —— 至少这个过长可能会长到使应用程序因无法分配到新的内存而抛出OOM错误。但C4算法是基于*LVB（load value barrier）*实现的，LVB具有自愈能力，可以使应用程序线程迅速查明某个引用是否已经被标记过了。如果这个引用没有被标记过，那么应用程序会将其添加到GC队列中。一旦该引用被放入到队列中，它就不会再被重标记了。应用程序线程可以继续做它自己的事。
+如果C4算法的实现是基于脏卡表（dirty-card tables）或其他对已经遍历过的堆区域的读写操作进行记录的方法，那垃圾回收线程就需要重新访问这些区域做重标记。在极端条件下，垃圾回收线程会陷入到永无止境的重标记中 —— 至少这个过程可能会长到使应用程序因无法分配到新的内存而抛出OOM错误。但C4算法是基于*LVB（load value barrier）*实现的，LVB具有自愈能力，可以使应用程序线程迅速查明某个引用是否已经被标记过了。如果这个引用没有被标记过，那么应用程序会将其添加到GC队列中。一旦该引用被放入到队列中，它就不会再被重标记了。应用程序线程可以继续做它自己的事。
 
 >*Dirty objects and card tables*
 >
@@ -110,9 +110,9 @@ With C4 there is never a need for a re-marking phase: all reachable objects are 
 在C4算法中，并没有重标记（re-marking）这个阶段，在第一次便利整个堆时就会将所有可达对象做标记。因为运行时不需要做重标记，也就不会陷入无限循环的重标记陷阱中，由此而降低了应用程序因无法分配到内存而抛出OOM错误的风险。
 
 
-#Relocation in C4 -- where threads and GC collaborate#
+##Relocation in C4 -- where threads and GC collaborate##
 
-#C4算法中的重定位 ——　应用程序线程与GC的协作#
+##C4算法中的重定位 ——　应用程序线程与GC的协作##
 
 The *relocation phase* of C4 is both collaborative and concurrent. This is because both GC and application threads are active concurrently, and because whichever thread first reaches an object to be moved can (collaboratively) facilitate that move. Application threads can thus smoothly continue their tasks, without having to wait for an entire garbage collection cycle to complete.
 
