@@ -12,11 +12,11 @@ JVM performance optimization, Part 4: C4 垃圾回收
 
 By now in this series it is obvious that I consider stop-the-world garbage collection to be a serious roadblock to Java application scalability, which is fundamental to modern Java enterprise development. Fortunately, some newer flavors of JVMs are finding ways to either fine-tune stop-the-world garbage collection or -- better yet -- do away with its lengthy pauses altogether. I am excited about new approaches to Java scalability that fully leverage the potential of multicore systems, where memory is cheap and plentiful.
 
-到目前为止，本系列的文章将stop-the-world式的垃圾回收视为影响Java应用程序伸缩性的一大障碍，而伸缩性又是现代企业级Java应用程序开发的基础要求，因此这一问题亟待改善。幸运的是，针对此问题，JVM中的已经出现了一些新特性，所使用的方式或是对stop-the-world式的垃圾回收做微调，或是消除冗长的暂停（这样更好些）。在一些多核系统中，内存不再是稀缺资源，因此，JVM的一些新特性就充分利用多核系统的潜在优势来增强Java应用程序的伸缩性。
+到目前为止，本系列的文章将stop-the-world式的垃圾回收视为影响Java应用程序伸缩性的一大障碍，而伸缩性又是现代企业级Java应用程序开发的基础要求，因此这一问题亟待改善。幸运的是，针对此问题，JVM中已经出现了一些新特性，所使用的方式或是对stop-the-world式的垃圾回收做微调，或是消除冗长的暂停（这样更好些）。在一些多核系统中，内存不再是稀缺资源，因此，JVM的一些新特性就充分利用多核系统的潜在优势来增强Java应用程序的伸缩性。
 
 In this article I focus primarily on the C4 algorithm, which is an upgrade of the Azul Systems Pauseless GC algorithm, currently implemented only for the Zing JVM. I also briefly discuss Oracle's G1 and IBM's Balanced Garbage Collection Policy algorithms. I hope that learning about these different approaches to garbage collection will expand your sense of what is possible with Java's memory-management model and with Java application scalability. Perhaps it will even inspire you to come up with some new innovative ideas for handling compaction? You will at least know more about your options when choosing a JVM, along with some basic guidelines for different application scenarios. (Note that this article focuses on low-latency and latency-sensitive Java applications.)
 
-在本文中，我将着重介绍C3算法，该算法是Azul System公司中无暂停垃圾回收算法的新成果，目前只在Zing JVM上得到实现。此外，还将对Oracle公司的G1垃圾回收算法和IBM公司的Balanced Garbage Collection Policy算法做简单介绍。希望通过对这些垃圾回收算法的学习可以扩展你对Java内存管理模型和Java应用程序伸缩性的理解，并激发你对这方面内容的兴趣以便更深入的学习相关知识。至少，你可以学习到在选择JVM时有哪些需要关注的方面，以及在不同应用程序场景下要注意的事项。
+在本文中，我将着重介绍C4算法，该算法是Azul System公司中无暂停垃圾回收算法的新成果，目前只在Zing JVM上得到实现。此外，本文还将对Oracle公司的G1垃圾回收算法和IBM公司的Balanced Garbage Collection Policy算法做简单介绍。希望通过对这些垃圾回收算法的学习可以扩展你对Java内存管理模型和Java应用程序伸缩性的理解，并激发你对这方面内容的兴趣以便更深入的学习相关知识。至少，你可以学习到在选择JVM时有哪些需要关注的方面，以及在不同应用程序场景下要注意的事项。
 
 
 #Concurrency in the C4 algorithm#
@@ -25,7 +25,7 @@ In this article I focus primarily on the C4 algorithm, which is an upgrade of th
 
 Azul Systems' Concurrent Continuously Compacting Collector (C4) algorithm takes an interesting and unique approach to low latency generational garbage collection. C4 is different from most generational garbage collectors because it is built on the assumptions that garbage is good -- meaning that applications generating garbage are doing good work -- and that compaction is inevitable. C4 is designed to satisfy varying and dynamic memory requirements, making it especially well-suited for long-running server-side applications.
 
-Azul System公司的C4（Concurrent Continuously Compacting Collector，译者注，Azul官网给出的名字是Continuously Concurrent Compacting Collector）算法使用独一无二而又非常有趣的方法来实现低延迟的分代式垃圾回收。相比于大多数分代式垃圾回收器，C4的不同之处在于它认为垃圾回收是好事（即应用程序产生垃圾是在做好事），而压缩是不可避免的。在设计之初，C4就是要牺牲各种动态内存管理的需求，以适应需要长时间运行的服务器端应用程序的需求。
+Azul System公司的C4（Concurrent Continuously Compacting Collector，译者注，Azul官网给出的名字是Continuously Concurrent Compacting Collector）算法使用独一无二而又非常有趣的方法来实现低延迟的分代式垃圾回收。相比于大多数分代式垃圾回收器，C4的不同之处在于它认为垃圾回收并不是什么坏事（即应用程序产生垃圾很正常），而压缩是不可避免的。在设计之初，C4就是要牺牲各种动态内存管理的需求，以满足需要长时间运行的服务器端应用程序的需求。
 
 
 >*jvm性能优化系列文章*
@@ -37,7 +37,7 @@ Azul System公司的C4（Concurrent Continuously Compacting Collector，译者�
 
 The C4 algorithm decouples the process of freeing memory from application behavior and allocation rates. It is concurrent in a way that allows applications to run continuously without having to wait for the garbage collector to do its thing. This concurrency is key to providing consistently low pause times, regardless of how much live data is on the heap or how many references need to be traversed and updated during garbage collection. As I discussed in "[JVM performance optimization, Part 3][4]," most garbage collectors do stop-the-world compaction, which means that they experience increased pause times as the amount of live data and complexity on the heap increases. A garbage collector running the C4 algorithm does compaction concurrently with running application threads, thereby eliminating one of the biggest hurdles to JVM scalability.
 
-C4算法将释放内存的过程从应用程序行为和内存分配速率中分离出来，并加以区分。这样就实现了并发运行，即应用程序可以持续运行，而不必理会垃圾回收器的工作情况。其中的并发性是关键所在，正是由于并发性的存在才可以不受垃圾回收周期内堆上活动数据数量和需要跟踪与更新的引用数量的影响，将暂停时间保持在较低的水平。正如我在本系列[第3篇][4]中介绍的一样，大多数垃圾回收器在工作周期内都包含了stop-the-world式的压缩过程，这就是说应用程序的暂停时间会随活动数据总量和堆中对象间引用的复杂度的上升而增加。使用C4算法的垃圾回收器可以并发的执行压缩操作，即与应用程序线程同时工作，从而解决了影响JVM伸缩的最大难题。
+C4算法将释放内存的过程从应用程序行为和内存分配速率中分离出来，并加以区分。这样就实现了并发运行，即应用程序可以持续运行，而不必等待垃圾回收的完成。其中的并发性是关键所在，正是由于并发性的存在才可以使暂停时间不受垃圾回收周期内堆上活动数据数量和需要跟踪与更新的引用数量的影响，将暂停时间保持在较低的水平。正如我在本系列[第3篇][4]中介绍的一样，大多数垃圾回收器在工作周期内都包含了stop-the-world式的压缩过程，这就是说应用程序的暂停时间会随活动数据总量和堆中对象间引用的复杂度的上升而增加。使用C4算法的垃圾回收器可以并发的执行压缩操作，即压缩与应用程序线程同时工作，从而解决了影响JVM伸缩性的最大难题。
 
 Being concurrent, the C4 algorithm actually changes the premise of modern Java enterprise architecture and deployment models. Just consider what hundreds of GB per JVM instance could do for your Java applications:
 
@@ -58,7 +58,7 @@ Being concurrent, the C4 algorithm actually changes the premise of modern Java e
 
 The main design premises of the C4 algorithm are "garbage is good" and "compaction is inevitable." C4's design goal is to be both concurrent and collaborative, thus eliminating the need for stop-the-world collection. The C4 garbage collection algorithm consists of three phases:
 
-C4算法的一个基本假设是“垃圾回收是好事”和“压缩不可避免”。C4算法的设计目标是实现垃圾回收的并发与协作，剔除stop-the-world式的垃圾回收。C4垃圾回收算法包含一下3个阶段：
+C4算法的一个基本假设是“垃圾回收不是坏事”和“压缩不可避免”。C4算法的设计目标是实现垃圾回收的并发与协作，剔除stop-the-world式的垃圾回收。C4垃圾回收算法包含一下3个阶段：
 
 1. *Marking* -- finding what's live
 2. *Relocation* -- moving things together to free up larger consecutive space (also known as compaction)
@@ -75,7 +75,7 @@ We'll look at each phase in detail.
 
 ##Marking in C4##
 
-#C4算法中的标记阶段#
+##C4算法中的标记阶段##
 
 The *marking phase* of the C4 algorithm uses a concurrent marking and reference-tracing approach, which I discussed in detail in [Part 3][4] of this series.
 
