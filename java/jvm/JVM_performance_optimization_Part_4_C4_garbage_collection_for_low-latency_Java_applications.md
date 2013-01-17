@@ -120,7 +120,7 @@ C4算法中，*重定位阶段（reloacation phase）*是由GC线程和应用程
 
 As Figure 2 shows, the live objects in a fragmented memory page are to be relocated. In the case of an application thread reaching a yet-to-be-moved object, the initial part of the move is facilitated by the application thread, so that it can quickly continue with its tasks. Virtual addresses (and thus references) are kept intact, so that memory can be immediately reclaimed.
 
-正如Figure 2所示，碎片内存页中的活动对象会被重定位。在这个例子中，应用程序线程先访问了要被移动的对象，那么应用程序线程也会帮助完成移动该对象的工作的初始部分，这样，它就可以很快的继续做自己的任务。虚拟地址（指相关引用）可以完好无损的保留，内存也可以快速回收。
+正如Figure 2所示，碎片内存页中的活动对象会被重定位。在这个例子中，应用程序线程先访问了要被移动的对象，那么应用程序线程也会帮助完成移动该对象的工作的初始部分，这样，它就可以很快的继续做自己的任务。虚拟地址（指相关引用）可以指向新的正确位置，内存也可以快速回收。
 
 ![Figure 2. A page selected for relocation and the empty new page that it will be moved to](images/jvmseries4-fig2.png?raw=true "Figure 2. A page selected for relocation and the empty new page that it will be moved to")
 
@@ -128,7 +128,7 @@ Figure 2. A page selected for relocation and the empty new page that it will be 
 
 If a GC thread is assigned an object to be moved then there are no complications; the GC thread simply does the move. If an application thread tries to reach an object during the remapping phase (which is next), then it must check whether the object is to be moved. If so the application thread will escalate the relocation of the object so that it can continue with its work. (Larger objects are moved via shattered object moves. If you are interested in learning more about how shattered object moves work, I recommend reading the white paper "C4: The Continuously Concurrent Compacting Collector," listed in Resources.)
 
-如果是GC线程先访问到了将被移动的对象，那就简单多了，GC线程会执行移动操作的。如果在重映射阶段（re-mapping phase，后续会提到）也访问这个对象，那么它必须检查该对象是否是要被移动的。如果是，那么应用程序线程会重新定位这个对象的位置，以便可以继续完成自己任务。（对大对象的移动是通过将该对象打碎再移动完成的。如果你对这部分内容感兴趣的话，推荐你阅读一下相关资源中的这篇白皮书“C4: The Continuously Concurrent Compacting Collector”）
+如果是GC线程先访问到了将被移动的对象，那事情就简单多了，GC线程会执行移动操作的。如果在重映射阶段（re-mapping phase，后续会提到）也访问这个对象，那么它必须检查该对象是否是要被移动的。如果是，那么应用程序线程会重新定位这个对象的位置，以便可以继续完成自己任务。（对大对象的移动是通过将该对象打碎再移动完成的。如果你对这部分内容感兴趣的话，推荐你阅读一下相关资源中的这篇白皮书“C4: The Continuously Concurrent Compacting Collector”）
 
 Once all the live objects are completely moved out of a memory page, anything left behind is garbage. The page that the objects have moved out of is immediately available to be reclaimed, as you can see in the bottom display of Figure 2.
 
@@ -140,20 +140,20 @@ Once all the live objects are completely moved out of a memory page, anything le
 
 >*关于清理*
 >
->在C4算法中并不需要清理阶段（sweep phase），因此也就不需要这个在大多数垃圾回收算法中比较常用的操作。在指向被移动的对象的引用都更新为指向新的位置之前，from页中的虚拟地址空间必须被完整保留。所以C4算法的实现保证了，在所有指向这个页的引用处于稳定状态前，所有的虚拟地址空间都会被锁定。然后，算法会立即回收物理内存页。
+>在C4算法中并不没有清理阶段（sweep phase），因此也就不需要这个在大多数垃圾回收算法中比较常用的操作。在指向被移动的对象的引用都更新为指向新的位置之前，from页中的虚拟地址空间必须被完整保留。所以C4算法的实现保证了，在所有指向这个页的引用处于稳定状态前，所有的虚拟地址空间都会被锁定。然后，算法会立即回收物理内存页。
 
 Clearly there is great benefit to eliminating the need to stop the world in order to move objects together. As all live objects are concurrently moved during the relocation phase, they are also efficiently moved into adjacent addresses, where they end up fully compacted in the target page. Through concurrent relocation the heap is continuously compacted, without the need to ever stop all application threads at once. This approach to compaction removes the traditional limits to Java application access to memory (see [Part 1][2] for more about the Java application memory model).
 
-很明显，无需执行stop-the-world式的移动对象是有很大好处的。由于在重定位阶段，所有活动对象都是并发移动的，因此它们可以被更有效率的放入到相邻的地址中，并且可以充分的压缩。通过并发执行重定位操作，堆被压缩为连续空间，也无需刮起所有的应用程序线程。这种方式消除了Java应用程序访问内存的传统限制（更多关于Java应用程序内存模型的内容参见[Part 1][2]）。
+很明显，无需执行stop-the-world式的移动对象是有很大好处的。由于在重定位阶段，所有活动对象都是并发移动的，因此它们可以被更有效率的放入到相邻的地址中，并且可以充分的压缩。通过并发执行重定位操作，堆被压缩为连续空间，也无需挂起所有的应用程序线程。这种方式消除了Java应用程序访问内存的传统限制（更多关于Java应用程序内存模型的内容参见[Part 1][2]）。
 
 Having said all that, what about updating references? How is that not a stop-the-world operation?
 
 经过上述的过程后，如何更新引用呢？如何实现一个非stop-the-world式的操作呢？
 
 
-#Remapping in C4#
+##Remapping in C4##
 
-#C4算法中的重映射#
+##C4算法中的重映射##
 
 Some references to moved objects are automatically updated as part of an object relocation. The references to a relocated page are not touched during the relocation phase, however, so they still need to be updated. C4's *remapping phase* handles updating references that are still pointing to a page where live objects have been moved out. The remapping phase is also concurrent and collaborative.
 
