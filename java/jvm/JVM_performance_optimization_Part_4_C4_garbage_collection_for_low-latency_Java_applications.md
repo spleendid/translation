@@ -214,9 +214,9 @@ If you can't provide a server with 64 GB, 128 GB, or 1 TB RAM (or more), then a 
 
 ##Gargabe-First （G1） 垃圾回收器##
 
-G1 (Garbage-First) is a fairly new garbage collector that is part of the Oracle HotSpot JVM. G1 first appeared in the later versions of JDK 6. It is enabled by specifying -XX:+UseG1GC on your Oracle JDK startup command line.
+G1 (Garbage-First) is a fairly new garbage collector that is part of the Oracle HotSpot JVM. G1 first appeared in the later versions of JDK 6. It is enabled by specifying *-XX:+UseG1GC* on your Oracle JDK startup command line.
 
-G1垃圾回收器是新近才出现的垃圾回收器，是Oracle HotSpot JVM的一部分，在最近的JDK1.6版本中首次出现（译者注，该文章写于2012-07-11）。在启动Oracle JDK时附加命令行选项_-XX:+UseG1GC_，可以启动G1垃圾回收器。
+G1垃圾回收器是新近才出现的垃圾回收器，是Oracle HotSpot JVM的一部分，在最近的JDK1.6版本中首次出现（译者注，该文章写于2012-07-11）。在启动Oracle JDK时附加命令行选项*-XX:+UseG1GC*，可以启动G1垃圾回收器。
 
 Like C4, this mark-and-sweep collector offers an alternative approach to garbage collection in latency-sensitive applications. The G1 algorithm divides HotSpot's heap into fixed-size areas, onto which partial collection can be applied. It utilizes background threads to do heap marking concurrently with running application threads, which is similar to other concurrent marking algorithms.
 
@@ -224,7 +224,7 @@ Like C4, this mark-and-sweep collector offers an alternative approach to garbage
 
 G1's incremental approach results in shorter but more frequent pauses, which for some applications is enough to avoid long stop-the-world pauses. On the downside, as discussed in [Part 3][4], G1 does require you to spend time tuning the garbage collector for your current application load needs, and it does stop the world for GC interruptions. So G1 isn't a good fit for all low-latency applications. Moreover, the total time paused in G1 is high compared to in CMS, Oracle JVM's best-known concurrent mark-and-sweep collector.
 
-G1增量方法可以是暂停时间更短，但更频繁，而这对一些力求避免长时间暂停的应用程序来说已经足够了。另一方面，正如在本系列的[Part 3][4]中介绍的，使用G1垃圾回收器需要针对应用程序的实际需求做长时间的调优，而其GC终端又是stop-the-world式的。所以对那些对低延迟有很高要求的应用程序来说，G1并不是一个好的选择。进一步说，从暂停时间总长来看，G1长于CMS（Oracle JVM中广为人知的并发垃圾回收器）。
+G1增量方法可以使暂停时间更短，但更频繁，而这对一些力求避免长时间暂停的应用程序来说已经足够了。另一方面，正如在本系列的[Part 3][4]中介绍的，使用G1垃圾回收器需要针对应用程序的实际需求做长时间的调优，而其GC中断又是stop-the-world式的。所以对那些对低延迟有很高要求的应用程序来说，G1并不是一个好的选择。进一步说，从暂停时间总长来看，G1长于CMS（Oracle JVM中广为人知的并发垃圾回收器）。
 
 G1 uses a copying algorithm (discussed in Part 3) for its partial collections. As a result, completely free areas are produced with each collection. The G1 garbage collector defines a set of areas as young space and the rest are designated as old space.
 
@@ -232,20 +232,20 @@ G1使用拷贝算法（在Part 3中介绍过）完成部分垃圾回收任务。
 
 G1 has received considerable attention and caused some hype, but it presents challenges in real-world deployments. Getting the tuning right is one -- recall that there is no "right tuning" for dynamic application loads. One issue is how to handle large objects that are close to the size of the partitions, because the left-over spaces cause fragmentation. There is also a performance tax associated with low-latency garbage collectors generally, which is that the collector must manage additional data structures. For me, the key issue of using G1 would be how to manage stop-the-world pauses. Stop-the-world pauses hinder any garbage collector's ability to scale with growing heap sizes and live data sizes, presenting a roadblock to Java enterprise scalability.
 
-G1已经吸引了足够多的注意，引起了不小的轰动，但是它真正的挑战在于如何应对现实世界的需求。正确的调优就是其中一个挑战 —— 回忆一下，对于动态应用程序负载来说，没有永远“正确的调优”。一个问题是如何处理与分区大小相近的大对象，因为剩余的空间会成为碎片而无法使用。还有一个性能问题使用困扰着低延迟垃圾回收器，那就是垃圾回收器必须管理额外的数据结果。就我来说，使用G1的关键问题在于如何管理stop-the-world式垃圾回收器引起的暂停。Stop-the-world式的垃圾回收引起的暂停使任何垃圾回收器的能力都受制于堆大小和活动数据数量的增长，对企业级Java应用程序的伸缩性来说是一大困扰。
+G1已经吸引了足够多的注意，引起了不小的轰动，但是它真正的挑战在于如何应对现实世界的需求。正确的调优就是其中一个挑战 —— 回忆一下，对于动态应用程序负载来说，没有永远“正确的调优”。一个问题是如何处理与分区大小相近的大对象，因为剩余的空间会成为碎片而无法使用。还有一个性能问题始终困扰着低延迟垃圾回收器，那就是垃圾回收器必须管理额外的数据结构。就我来说，使用G1的关键问题在于如何解决stop-the-world式垃圾回收器引起的暂停。Stop-the-world式的垃圾回收引起的暂停使任何垃圾回收器的能力都受制于堆大小和活动数据数量的增长，对企业级Java应用程序的伸缩性来说是一大困扰。
 
 
 ##IBM JVM Balanced Garbage Collection Policy##
 
 ##IBM JVM的平衡垃圾回收策略（Balanced Garbage Collection Policy）##
 
-The IBM JVM Balanced Garbage Collection (BGC) Policy is enabled by specifying _-Xgcpolicy:balanced_ on your IBM JDK startup command line. BGC looks at first glance very much like G1. It splits the Java heap into many equal-sized areas called regions, each of which can be collected independently. Heuristics are applied to choose which regions to garbage-collect for the best return on effort. BGC's approach to generations is very similar to G1's.
+The IBM JVM Balanced Garbage Collection (BGC) Policy is enabled by specifying *-Xgcpolicy:balanced* on your IBM JDK startup command line. BGC looks at first glance very much like G1. It splits the Java heap into many equal-sized areas called regions, each of which can be collected independently. Heuristics are applied to choose which regions to garbage-collect for the best return on effort. BGC's approach to generations is very similar to G1's.
 
-IBM JVM的平衡垃圾回收（Balanced Garbage Collection BGC）策略通过在启动IBM JDK时指定命令行选项_-Xgcpolicy:balanced_来启用。乍一看，BGC很想G1。它也是将Java堆划分成相同大小的空间，称为区间（region），执行垃圾回收时会对每个区间单独回收。为了达到最佳性能，在选择要执行垃圾回收的区间时使用了一些启发性算法。BGC中关于代的划分也与G1相似。
+IBM JVM的平衡垃圾回收（Balanced Garbage Collection BGC）策略通过在启动IBM JDK时指定命令行选项*-Xgcpolicy:balanced*来启用。乍一看，BGC很像G1，它也是将Java堆划分成相同大小的空间，称为区间（region），执行垃圾回收时会对每个区间单独回收。为了达到最佳性能，在选择要执行垃圾回收的区间时使用了一些启发性算法。BGC中关于代的划分也与G1相似。
 
 IBM's Balanced Garbage Collection Policy is available only on 64-bit platforms. It is NUMA (Non-Uniform Memory Architecture) aware, and it is designed to work well with heap sizes over 4 GB. BGC's partial collections are mostly stop-the-world GCs, either due to the copying approach or to the need for compaction (which is a non-concurrent operation). So in the end BGC reproduces the tuning and scalability challenges found in G1 and other low-latency garbage collectors that don't implement concurrent compaction.
 
-IBM的平衡垃圾回收策略仅在64位平台得到实现，是一种NUMA架构（Non-Uniform Memory Architecture），设计之初是为了用于具有4GB以上堆的应用程序。由于拷贝算法或压缩算法的需要，BGC的部分垃圾回收工作是stop-the-world式的，并非完全并发完成。所以，归根结底，BGC所遇到的问题与G1和其他没有实现并发压缩选法的垃圾回收器相似。
+IBM的平衡垃圾回收策略仅在64位平台得到实现，是一种NUMA架构（Non-Uniform Memory Architecture），设计之初是为了用于具有4GB以上堆的应用程序。由于拷贝算法或压缩算法的需要，BGC的部分垃圾回收工作是stop-the-world式的，并非完全并发完成。所以，归根结底，BGC也会遇到与G1和其他没有实现并发压缩选法的垃圾回收器相似的问题。
 
 
 #In conclusion: Reflection points and highlights#
@@ -262,7 +262,7 @@ C4是基于引用跟踪的、分代式的、并发的、协作式垃圾回收算
 * No more sweep phase reduces the risk of running out of memory before the entire GC is finished and all free memory is reclaimed.
 * Memory is immediately reclaimed on a page basis, making large spaces of memory continuously available for memory-hungry Java applications.
 
-* 消除了重标记可能引起的无限循环，也就消除了在标记阶段出现OOM错误的风险。
+* 消除了重标记可能引起的重标记无限循环，也就消除了在标记阶段出现OOM错误的风险。
 * 压缩，以自动、且不断重定位的方式消除了固有限制：堆中活动数据越多，压缩所引起的暂停越长。
 * 垃圾回收不再是stop-the-world式的，大大降低垃圾回收对应用程序响应时间造成的影响。
 * 没有了清理阶段，降低了在完成GC之前就因为空闲内存不足而出现OOM错误的风险。
@@ -271,7 +271,7 @@ C4是基于引用跟踪的、分代式的、并发的、协作式垃圾回收算
 
 Concurrent compaction is what makes C4 unique. Letting application threads and GC threads collaboratively update object references, as they are discovered, ensures that your application will never be blocked until GC is finished. C4 fully decouples allocation rates from the ability to provide enough free and consecutive memory. The C4 algorithm enables you to make JVM instances as large as you need them, without worrying about pauses. Used appropriately, this is one JVM innovation that can bring low-latency Java applications up to speed with today's multicore and TB-size hardware.
 
-并发压缩是C4独一无二的优势。使应用程序线程GC线程协作运行，保证了应用程序不会因GC而被阻塞。C4算法将内存分配和提供足够连续空闲内存的能力完全区分开。C4算法是你可以为JVM实例分配尽可能大的内存，而无需为应用程序暂停而烦恼。使用的当的话，这将是JVM的一项革新，它可以借助于当今的多核、TB级内存的硬件，将大大提升低延迟Java应用程序的运行速度。
+并发压缩是C4独一无二的优势。使应用程序线程GC线程协作运行，保证了应用程序不会因GC而被阻塞。C4将内存分配和提供足够连续空闲内存的能力完全区分开。C4使你可以为JVM实例分配尽可能大的内存，而无需为应用程序暂停而烦恼。使用得当的话，这将是JVM技术的一项革新，它可以借助于当今的多核、TB级内存的硬件优势，大大提升低延迟Java应用程序的运行速度。
 
 G1 is a good alternative if you don't mind tuning and retuning, or frequent restarts, and if your application adapts well to a horizontal deployment model for scale, e.g., hundreds of small instances instead of few larger ones.
 
@@ -279,18 +279,11 @@ G1 is a good alternative if you don't mind tuning and retuning, or frequent rest
 
 BGC is an innovative approach to dynamic low-latency heuristic adaption, something that JVM researchers have worked on for decades. This algorithm allows for slightly larger heap sizes. The downside of a dynamic self-tuning algorithm, is the instance when self-tuning can't keep up with sudden peaks and changes. You will still have to live with worst-case scenarios and allocate resources accordingly.
 
-对于动态低延迟启发性自适应（dynamic low-latency heuristic adaption）算法而言，BGC是一项革新，JVM研究者对此已经研究了几十年。该算法可以应用于较大的堆。而动态自调优算法（ dynamic self-tuning algorithm）的缺陷是，它无法跟上突然出现的负载高峰。那时，你将不得不面对最糟糕的场景，并根据实际情况分配相关资源。
+对于动态低延迟启发性自适应（dynamic low-latency heuristic adaption）算法而言，BGC是一项革新，JVM研究者对此算法已经研究了几十年。该算法可以应用于较大的堆。而动态自调优算法（ dynamic self-tuning algorithm）的缺陷是，它无法跟上突然出现的负载高峰。那时，你将不得不面对最糟糕的场景，并根据实际情况再分配相关资源。
 
 In the end the choice of best JVM and garbage collector for your application comes down to your priorities. What do you want to spend time and money on? From a purely technical angle,based on a decade of garbage collection experience, I am looking forward to seeing more innovation around concurrent compaction, or perhaps other approaches to moving objects or doing reallocation as a less intrusive operation. I think the key to Java enterprise scalability lies in concurrency.
 
 最后，为你的应用程序选择最适合的JVM和垃圾回收器时，最重要的考虑因素是应用程序中吞吐量和暂停时间的优先级次序。你想把时间和金钱花在哪？从纯粹的技术角度说，基于我十年来对垃圾回收的经验，我一直在寻找更多关于并发压缩的革新性技术，或其他可以以较小代价完成移动对象或重定位的方法。我想影响企业级Java应用程序伸缩性的关键就在于并发性。
-
-
-
-
-#关于作者#
-
-Eva Andearsson对JVM计数、SOA、云计算和其他企业级中间件解决方案有着10多年的从业经验。在2001年，她以JRockit JVM开发者的身份加盟了创业公司Appeal Virtual Solutions（即BEA公司的前身）。在垃圾回收领域的研究和算法方面，EVA获得了两项专利。此外她还是提出了确定性垃圾回收（Deterministic Garbage Collection），后来形成了JRockit实时系统（JRockit Real Time）。在技术上，Eva与Sun公司和Intel公司合作密切，涉及到很多将JRockit产品线、WebLogic和Coherence整合的项目。2009年，Eva加盟了[Azul System][10]公司，担任产品经理。负责新的Zing Java平台的开发工作。最近，她改换门庭，以高级产品经理的身份加盟[Cloudera][11]公司，负责管理Cloudera公司Hadoop分布式系统，致力于高扩展性、分布式数据处理框架的开发。
 
 
 #相关资源#
@@ -309,6 +302,10 @@ _More about garbage collection:_
 * The IBM Software Developers Kit (SDK) for Java documentation includes information about the [Balanced Garbage Collection Policy][8].
 * "[Java VM: IBM vs Sun][9]" (Stackoverflow.com, December 2008): What factors might help you choose?
 
+
+#关于作者#
+
+Eva Andearsson对JVM计数、SOA、云计算和其他企业级中间件解决方案有着10多年的从业经验。在2001年，她以JRockit JVM开发者的身份加盟了创业公司Appeal Virtual Solutions（即BEA公司的前身）。在垃圾回收领域的研究和算法方面，EVA获得了两项专利。此外她还是提出了确定性垃圾回收（Deterministic Garbage Collection），后来形成了JRockit实时系统（JRockit Real Time）。在技术上，Eva与Sun公司和Intel公司合作密切，涉及到很多将JRockit产品线、WebLogic和Coherence整合的项目。2009年，Eva加盟了[Azul System][10]公司，担任产品经理。负责新的Zing Java平台的开发工作。最近，她改换门庭，以高级产品经理的身份加盟[Cloudera][11]公司，负责管理Cloudera公司Hadoop分布式系统，致力于高扩展性、分布式数据处理框架的开发。
 
 
 
