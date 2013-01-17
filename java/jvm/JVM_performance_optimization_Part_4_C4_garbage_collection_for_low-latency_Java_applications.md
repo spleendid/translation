@@ -157,11 +157,11 @@ Having said all that, what about updating references? How is that not a stop-the
 
 Some references to moved objects are automatically updated as part of an object relocation. The references to a relocated page are not touched during the relocation phase, however, so they still need to be updated. C4's *remapping phase* handles updating references that are still pointing to a page where live objects have been moved out. The remapping phase is also concurrent and collaborative.
 
-在重定位阶段，某些指向被移动的对象的引用会自动更新。但是，在重定位阶段，指向重定位页中对象的引用并不会更新，所以它们需要在后续完成更新操作。C4算法中的*重映射阶段（re-mapping phase）*负责完成对那些活动对象已经移出，但仍指向那些的引用进行更新。当然，重映射也是一个协作式的并发操作。
+在重定位阶段，某些指向被移动的对象的引用会自动更新。但是，在重定位阶段，那些指向了被移动的对象的引用并没有更新，仍然指向原处，所以它们需要在后续完成更新操作。C4算法中的*重映射阶段（re-mapping phase）*负责完成对那些活动对象已经移出，但仍指向那些的引用进行更新。当然，重映射也是一个协作式的并发操作。
 
 In Figure 3, live objects have just been moved to a new memory page during the relocation phase. After relocation, the GC threads immediately start updating references to preserved virtual memory addresses, pointing them to the moved objects' new locations. The garbage collector continues this activity until all references are updated and the virtual memory space can be reclaimed.
 
-在Figure 3中，在重定位阶段，活动对象已经被移动到了一个新的内存页中。在重定位之后，GC线程立即开始更新那些仍然指向之前的虚拟地址空间的引用，将它们指向那些被移动的对象的新地址。垃圾回收器会一直执行此项任务，知道所有的引用都被更新，这样虚拟内存空间就可以被整体回收了。
+Figure 3中，在重定位阶段，活动对象已经被移动到了一个新的内存页中。在重定位之后，GC线程立即开始更新那些仍然指向之前的虚拟地址空间的引用，将它们指向那些被移动的对象的新地址。垃圾回收器会一直执行此项任务，直到所有的引用都被更新，这样原先虚拟内存空间就可以被整体回收了。
 
 ![Figure 3. Whatever thread finds an invalid address enables an update to the correct new address](images/jvmseries4-fig3.png?raw=true "Figure 3. Whatever thread finds an invalid address enables an update to the correct new address")
 
@@ -173,7 +173,7 @@ But what if an application thread tries to access a moved object before the GC h
 
 The collaborative approach to remapping ensures that a reference only needs to be touched once to be updated. All subsequent reference calls will hit the new address. Additionally, a reference's forwarding addresses will not be stored in the previous object location, as is common with other GC implementations; instead it is stored in an off-heap structure. Rather than having to keep an entire page intact until all references are updated, memory can be instantly reclaimed.
 
-协作式的重映射保证了引用只会被更新一次。该引用下的子引用都可以指向正确的新地址。此外，在大多数其他GC实现中，引用指向的地址不会被存储在该对象被移动之前的位置；相反，这些地址被存储在一个堆外结构（off-heap structure）中。无需在对所有引用的更新完成之前，再花费精力保持整个内存页完好无损，这个内存页可以被整体回收。
+协作式的重映射保证了引用只会被更新一次，该引用下的子引用也都可以指向正确的新地址。此外，在大多数其他GC实现中，引用指向的地址不会被存储在该对象被移动之前的位置；相反，这些地址被存储在一个堆外结构（off-heap structure）中。这样，无需在对所有引用的更新完成之前，再花费精力保持整个内存页完好无损，这个内存页可以被整体回收。
 
 
 #So is C4 really pauseless?#
@@ -182,11 +182,11 @@ The collaborative approach to remapping ensures that a reference only needs to b
 
 A thread following a reference during the C4 remapping phase will be interrupted just once, and the interrupt will only last as long as a lookup and an update, after which the thread will be up and running. This approach to remapping is a huge improvement over other concurrent algorithms that have to run every single thread to a safe point, stop all threads at the same time, perform all reference updates, and only then release all threads.
 
-在C4算法的重映射阶段，正在跟踪引用的线程仅会被中断一次，而这次中断仅仅会持续到检索和更新引用完成，在这次中断后，线程会继续运行。相比于其他并发算法来说，这种实现会带来巨大的性能提升，因为其他的并发立即回收算法需要等到每个线程都运行到一个安全点（safe point），然后同时挂起所有线程，再开始对所有的引用进行更新，完成后再恢复所有线程的运行。
+在C4算法的重映射阶段，正在跟踪引用的线程仅会被中断一次，而这次中断仅仅会持续到对该引用的检索和更新完成，在这次中断后，线程会继续运行。相比于其他并发算法来说，这种实现会带来巨大的性能提升，因为其他的并发立即回收算法需要等到每个线程都运行到一个安全点（safe point），然后同时挂起所有线程，再开始对所有的引用进行更新，完成后再恢复所有线程的运行。
 
 For a concurrently compacting collector, pause time caused by garbage collection is never an issue. There is also no worse-case fragmentation scenario with C4's approach to relocation. A C4 garbage collector won't do back-to-back garbage collection cycles or stop the running application for seconds or even minutes at a time. If you ever did experience a stop-the-world scenario with this garbage collector, it would simply indicate that you had assigned your application too little memory. You can assign a garbage collector running the C4 algorithm as much memory as it needs, without ever having to worry about pause times.
 
-对于并发压缩垃圾回收器来说，由于垃圾回收所引起的暂停永远不应该是个问题。在C4算法的重定位阶段汇总，也不会有再出现更糟的碎片化场景了。实现了C4算法的垃圾回收器也不会出现背靠背（back-to-back）式的垃圾回收周期，或者是因垃圾回收而使应用程序暂停数秒甚至数分钟。如果你曾经体验过这种stop-the-world式的垃圾回收，那么很有可能是你给应用程序设置的内存太小了。你可以试用一下实现了C4算法的垃圾回收器，并为其分配足够多的内存，而完全不必担心暂停时间过长的问题。
+对于并发压缩垃圾回收器来说，由于垃圾回收所引起的暂停从来都不是问题。在C4算法的重定位阶段中，也不会有再出现更糟的碎片化场景了。实现了C4算法的垃圾回收器也不会出现背靠背（back-to-back）式的垃圾回收周期，或者是因垃圾回收而使应用程序暂停数秒甚至数分钟。如果你曾经体验过这种stop-the-world式的垃圾回收，那么很有可能是你给应用程序设置的内存太小了。你可以试用一下实现了C4算法的垃圾回收器，并为其分配足够多的内存，而完全不必担心暂停时间过长的问题。
 
 
 #Evaluating the C4 algorithm, and other alternatives#
@@ -199,20 +199,20 @@ As always, you should choose a JVM and garbage collector based on the needs of y
 
 C4 is a less optimal choice for client-side applications that run quickly, and usually within smaller heap sizes, with no issues. C4 is also not well-suited for applications that prioritize throughput (like static benchmarks). C4 really makes a difference for application scenarios that need to deploy 4 to 16 JVM instances per server in order to support the application load. C4 is also worth considering for an application scenario where you find yourself constantly tuning your garbage collector. Above all, consider C4 when response time is more important than throughput for your business use case. C4 is an ideal choice for applications that can't stop for a long time (be it downtime or GC pause time).
 
-而对于那些要求快速启动，内存有限的客户端应用程序来说，C4算法并不是最好的选择。而对于那些对吞吐量有较高要求的应用程序来说，C4算法也并不适用。真正能够发挥C4算法威力的是那些为了提升应用程序工作负载而在每台服务器上部署了4到16个JVM实例的场景。此外，如果你经常要对垃圾回收器做调优的话，那么不妨考虑一下使用C4算法。综上所述，当响应时间比吞吐量占有更高的优先级时，C4算法是个不错的选择。而对那些不能接受长时间暂停的应用程序来说，C4算法是个理想的选择。
+而对于那些要求快速启动，内存有限的客户端应用程序来说，C4就不是那么适用。而对于那些对吞吐量有较高要求的应用程序来说，C4也并不适用。真正能够发挥C4威力的是那些为了提升应用程序工作负载而在每台服务器上部署了4到16个JVM实例的场景。此外，如果你经常要对垃圾回收器做调优的话，那么不妨考虑一下使用C4。综上所述，当响应时间比吞吐量占有更高的优先级时，C4是个不错的选择。而对那些不能接受长时间暂停的应用程序来说，C4是个理想的选择。
 
 If you are considering using C4 for a production application, then you probably also want to rethink how you deploy. Instead of, for example, 16 JVM instances of 2-GB heap size each for your current application load per server, you could now consider one JVM with 64 GB (or two for failover). C4 wants as large a heap as possible to guarantee that a free page is always available for allocating threads. (Remember that memory is cheap!)
 
-如果你正考虑在生产环境中使用C4，那么你可能还需要重新考虑一下如何部署应用程序。例如，不必为每个服务器配置16个具有2GB堆的JVM实例，而是使用一个64GB的JVM实例（或者增加一个作为备份）。C4算法需要尽可能大的内存来保证始终有一个空闲内存页来为新创建的对象分配内存。（记住，内存不再是昂贵的资源了！）
+如果你正考虑在生产环境中使用C4，那么你可能还需要重新考虑一下如何部署应用程序。例如，不必为每个服务器配置16个具有2GB堆的JVM实例，而是使用一个64GB的JVM实例（或者增加一个作为热备份）。C4需要尽可能大的内存来保证始终有一个空闲内存页来为新创建的对象分配内存。（记住，内存不再是昂贵的资源了！）
 
 If you can't provide a server with 64 GB, 128 GB, or 1 TB RAM (or more), then a distributed multi-JVM deployment could be a better choice. In those cases you might consider using the Oracle HotSpot JVM's G1 garbage collector, or IBM JVM's Balanced Garbage Collection Policy. I'll briefly discuss both options below.
 
 如果你没有64GB，128GB，或1TB（或更多）内存可用，那么分布式的多JVM部署可能是一个更好的选择。在这种场景中，你可以考虑使用Oracle HotSpot JVM的G1垃圾回收器，或者IBM JVM的平衡垃圾回收策略（Balanced Garbage Collection Policy）。下面将对这两种垃圾回收器做简单介绍。
 
 
-#Garbage-First (G1) garbage collector#
+##Garbage-First (G1) garbage collector##
 
-#Gargabe-First （G1） 垃圾回收器#
+##Gargabe-First （G1） 垃圾回收器##
 
 G1 (Garbage-First) is a fairly new garbage collector that is part of the Oracle HotSpot JVM. G1 first appeared in the later versions of JDK 6. It is enabled by specifying -XX:+UseG1GC on your Oracle JDK startup command line.
 
@@ -235,9 +235,9 @@ G1 has received considerable attention and caused some hype, but it presents cha
 G1已经吸引了足够多的注意，引起了不小的轰动，但是它真正的挑战在于如何应对现实世界的需求。正确的调优就是其中一个挑战 —— 回忆一下，对于动态应用程序负载来说，没有永远“正确的调优”。一个问题是如何处理与分区大小相近的大对象，因为剩余的空间会成为碎片而无法使用。还有一个性能问题使用困扰着低延迟垃圾回收器，那就是垃圾回收器必须管理额外的数据结果。就我来说，使用G1的关键问题在于如何管理stop-the-world式垃圾回收器引起的暂停。Stop-the-world式的垃圾回收引起的暂停使任何垃圾回收器的能力都受制于堆大小和活动数据数量的增长，对企业级Java应用程序的伸缩性来说是一大困扰。
 
 
-#IBM JVM Balanced Garbage Collection Policy#
+##IBM JVM Balanced Garbage Collection Policy##
 
-#IBM JVM的平衡垃圾回收策略（Balanced Garbage Collection Policy）#
+##IBM JVM的平衡垃圾回收策略（Balanced Garbage Collection Policy）##
 
 The IBM JVM Balanced Garbage Collection (BGC) Policy is enabled by specifying _-Xgcpolicy:balanced_ on your IBM JDK startup command line. BGC looks at first glance very much like G1. It splits the Java heap into many equal-sized areas called regions, each of which can be collected independently. Heuristics are applied to choose which regions to garbage-collect for the best return on effort. BGC's approach to generations is very similar to G1's.
 
