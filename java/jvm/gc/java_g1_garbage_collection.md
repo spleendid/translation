@@ -37,7 +37,7 @@ Garbage-First is a server-style garbage collector, targeted for multi-processors
 
 The G1 collector divides its work into multiple phases, each described below, which operate on a heap broken down into equally sized regions (see Figure 1). In the strictest sense, the heap doesn't contain generational areas, although a subset of the regions can be treated as such. This provides flexibility in how garbage collection is performed, which is adjusted on-the-fly according to the amount of processor time available to the collector.
 
-![Figure 1: With garbage-first, the heap is broken into equally sized regions.](../images/java_g1_garbage_collector-fig1.png?raw=true "Figure 1: With garbage-first, the heap is broken into equally sized regions")
+![Figure 1: With garbage-first, the heap is broken into equally sized regions.](translatin/images/java_g1_garbage_collector-fig1.png?raw=true "Figure 1: With garbage-first, the heap is broken into equally sized regions")
 
 Figure 1: With garbage-first, the heap is broken into equally sized regions.
 
