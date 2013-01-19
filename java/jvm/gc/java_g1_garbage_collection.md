@@ -37,13 +37,13 @@ Garbage-First is a server-style garbage collector, targeted for multi-processors
 
 The G1 collector divides its work into multiple phases, each described below, which operate on a heap broken down into equally sized regions (see Figure 1). In the strictest sense, the heap doesn't contain generational areas, although a subset of the regions can be treated as such. This provides flexibility in how garbage collection is performed, which is adjusted on-the-fly according to the amount of processor time available to the collector.
 
-![Figure 1: With garbage-first, the heap is broken into equally sized regions.](../../images/java_g1_garbage_collector-fig1.png?raw=true "Figure 1: With garbage-first, the heap is broken into equally sized regions")
+![Figure 1: With garbage-first, the heap is broken into equally sized regions.](../../../images/java_g1_garbage_collector-fig1.png?raw=true "Figure 1: With garbage-first, the heap is broken into equally sized regions")
 
 Figure 1: With garbage-first, the heap is broken into equally sized regions.
 
 Regions are further broken down into 512 byte sections called cards (see Figure 2). Each card has a corresponding one-byte entry in a global card table, which is used to track which cards are modified by mutator threads. Subsets of these cards are tracked, and referred to as Remembered Sets (RS), which is discussed shortly.
 
-![Figure 2: Each region has a remembered set of occupied cards.](../../images/java_g1_garbage_collector-fig2.png?raw=true "Figure 2: Each region has a remembered set of occupied cards.")
+![Figure 2: Each region has a remembered set of occupied cards.](../../../images/java_g1_garbage_collector-fig2.png?raw=true "Figure 2: Each region has a remembered set of occupied cards.")
 
 Figure 2: Each region has a remembered set of occupied cards.
 
@@ -54,7 +54,7 @@ The G1 collector works in stages. The main stages consist of remembered set (RS)
 
 Each region maintains an associated subset of cards that have recently been written to, called the Remembered Set (RS). Cards are placed in a region's RS via a write barrier, which is an efficient block of code that all mutator threads must execute when modifying an object reference. To be precise, for a particular region (i.e., region a), only cards that contain pointers from other regions to an object in region a are recorded in region a's RS (see Figure 3). A region's internal references, as well as null references, are ignored.
 
-![Figure 3: A region's RS tracks live references from outside the region.](../../images/java_g1_garbage_collector-fig3.png?raw=true "Figure 3: A region's RS tracks live references from outside the region.")
+![Figure 3: A region's RS tracks live references from outside the region.](../../../images/java_g1_garbage_collector-fig3.png?raw=true "Figure 3: A region's RS tracks live references from outside the region.")
 
 Figure 3: A region's RS tracks live references from outside the region.
 

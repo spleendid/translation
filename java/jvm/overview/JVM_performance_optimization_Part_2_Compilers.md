@@ -122,7 +122,7 @@ Java编译器是Java编程语言能独立于平台的根本原因。软件开发
 
 Figure 1中展示了纯解释运行、客户端模式运行、服务器端模式运行和层次编译模式运行下性能之间的区别。X轴表示运行时间（单位时间）Y轴表示性能（每单位时间内的操作数）。
 
-![Figure 1. Performance differences between compilers](../../images/jvmseries2-fig1.png?raw=true "Figure 1. Performance differences between compilers")
+![Figure 1. Performance differences between compilers](../../../images/jvmseries2-fig1.png?raw=true "Figure 1. Performance differences between compilers")
 
 *Figure 1. Performance differences between compilers*
 

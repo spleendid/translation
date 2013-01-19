@@ -62,7 +62,7 @@ _Java平台的垃圾回收机制大大提高的开发人员的生产力，但实
 
 在该算法的早期实现中，from区和to区会在垃圾回收周期后进行交换，即当to区被填满后，将再次启动垃圾回收，这是to区会“变成”from区。如图Figure 1所示。
 
-![Figure 1. A traditional copying garbage collection sequence](../../images/jvmseries3-fig1.png?raw=true "Figure 1. A traditional copying garbage collection sequence")
+![Figure 1. A traditional copying garbage collection sequence](../../../images/jvmseries3-fig1.png?raw=true "Figure 1. A traditional copying garbage collection sequence")
 
 Figure 1. A traditional copying garbage collection sequence
 

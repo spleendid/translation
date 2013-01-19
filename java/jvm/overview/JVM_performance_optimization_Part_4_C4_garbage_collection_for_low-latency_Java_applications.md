@@ -51,7 +51,7 @@ C4算法的一个基本假设是“垃圾回收不是坏事”和“压缩不可
 
 C4算法的标记器与其他并发标记器的区别也是始于并发标记阶段的。在并发标记阶段中，如果应用程序线程修改未标记的对象，那么该对象会被放到一个队列中，以备遍历。这就保证了该对象最终会被标记，也因为如此，C4垃圾回收器或另一个应用程序线程不会重复遍历该对象。这样就节省了标记时间，消除了递归重标记（recursive remark）的风险。（注意，长时间的递归重标记有可能会使应用程序因无法获得足够的内存而抛出OOM错误，这也是大部分垃圾回收场景中的普遍问题。）
 
-![Figure 1. Application threads traverse the heap just once during marking](../../images/jvmseries4-fig1.png?raw=true "Figure 1. Application threads traverse the heap just once during marking")
+![Figure 1. Application threads traverse the heap just once during marking](../../../images/jvmseries4-fig1.png?raw=true "Figure 1. Application threads traverse the heap just once during marking")
 
 Figure 1. Application threads traverse the heap just once during marking
 
@@ -74,7 +74,7 @@ C4算法中，*重定位阶段（reloacation phase）*是由GC线程和应用程
 
 正如Figure 2所示，碎片内存页中的活动对象会被重定位。在这个例子中，应用程序线程先访问了要被移动的对象，那么应用程序线程也会帮助完成移动该对象的工作的初始部分，这样，它就可以很快的继续做自己的任务。虚拟地址（指相关引用）可以指向新的正确位置，内存也可以快速回收。
 
-![Figure 2. A page selected for relocation and the empty new page that it will be moved to](../../images/jvmseries4-fig2.png?raw=true "Figure 2. A page selected for relocation and the empty new page that it will be moved to")
+![Figure 2. A page selected for relocation and the empty new page that it will be moved to](../../../images/jvmseries4-fig2.png?raw=true "Figure 2. A page selected for relocation and the empty new page that it will be moved to")
 
 Figure 2. A page selected for relocation and the empty new page that it will be moved to
 
@@ -97,7 +97,7 @@ Figure 2. A page selected for relocation and the empty new page that it will be 
 
 Figure 3中，在重定位阶段，活动对象已经被移动到了一个新的内存页中。在重定位之后，GC线程立即开始更新那些仍然指向之前的虚拟地址空间的引用，将它们指向那些被移动的对象的新地址。垃圾回收器会一直执行此项任务，直到所有的引用都被更新，这样原先虚拟内存空间就可以被整体回收了。
 
-![Figure 3. Whatever thread finds an invalid address enables an update to the correct new address](../../images/jvmseries4-fig3.png?raw=true "Figure 3. Whatever thread finds an invalid address enables an update to the correct new address")
+![Figure 3. Whatever thread finds an invalid address enables an update to the correct new address](../../../images/jvmseries4-fig3.png?raw=true "Figure 3. Whatever thread finds an invalid address enables an update to the correct new address")
 
 Figure 3. Whatever thread finds an invalid address enables an update to the correct new address
 
